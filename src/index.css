@@ -4,15 +4,16 @@
 
 @layer base {
   :root {
-    --bg-primary: #F8FAFC;
-    --bg-surface: rgba(255, 255, 255, 0.85);
-    --border-subtle: rgba(15, 23, 42, 0.08);
+    /* Toned down from bright white into an elegant, soothing gradient gray */
+    --bg-primary: #EBEEF2;
+    --bg-surface: rgba(243, 245, 249, 0.88);
+    --border-subtle: rgba(15, 23, 42, 0.1);
     --text-primary: #0F172A;
     --text-secondary: #475569;
   }
 
   .dark {
-    /* Lightened dark mode background per user spec: elevated titanium slate navy */
+    /* Elevated titanium slate navy */
     --bg-primary: #111827;
     --bg-surface: rgba(22, 32, 50, 0.75);
     --border-subtle: rgba(255, 255, 255, 0.1);
@@ -27,9 +28,9 @@
   }
 }
 
-/* Light mode: Gradient white to subtle grainy background */
+/* Light mode: Toned-down gradient gray background (no eye strain or harsh pure white) */
 body:not(.dark) {
-  background: radial-gradient(circle at 50% 0%, #FFFFFF 0%, #F8FAFC 50%, #F1F5F9 100%);
+  background: linear-gradient(135deg, #EAEFF5 0%, #E2E7EE 45%, #D9E0E8 100%);
   background-attachment: fixed;
 }
 
@@ -41,10 +42,11 @@ body:not(.dark) {
 
 /* Apple-style ultra-smooth glassmorphism */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(245, 247, 250, 0.88);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
 }
 
 .dark .glass-panel {
@@ -56,10 +58,10 @@ body:not(.dark) {
 }
 
 .glass-dropdown {
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(245, 247, 250, 0.96);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  border: 1px solid rgba(15, 23, 42, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.12);
   box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.15);
 }
 
@@ -72,15 +74,27 @@ body:not(.dark) {
 }
 
 .glass-pill {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(240, 243, 248, 0.8);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(15, 23, 42, 0.1);
 }
 
 .dark .glass-pill {
   background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Post-it bulletin sticky notes */
+.post-it-note {
+  position: relative;
+  box-shadow: 0 6px 16px -2px rgba(0, 0, 0, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.08);
+  transform: rotate(-0.5deg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.post-it-note:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.16);
 }
 
 /* Custom delicate scrollbars */
@@ -92,9 +106,9 @@ body:not(.dark) {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.35);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
+  background: rgba(148, 163, 184, 0.55);
 }

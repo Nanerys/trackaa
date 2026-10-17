@@ -9,6 +9,7 @@ import {
   Profile,
   ChatChannel,
   ChatMessage,
+  StatusReport,
   UserPermissions,
 } from '../types';
 
@@ -25,14 +26,15 @@ export const defaultAdminPermissions: UserPermissions = {
   canManageBlockers: true,
   canCreateSubgroups: true,
   canDirectMessage: true,
+  canManageStartupSettings: true,
 };
 
 export const defaultMemberPermissions: UserPermissions = {
-  canViewRoadmap: false, // Default restricted per user prompt example
+  canViewRoadmap: false,
   canEditRoadmap: false,
-  canViewFeedback: true, // View feedback allowed
+  canViewFeedback: true,
   canEditFeedback: true,
-  canViewFinances: false, // Restricted financial view
+  canViewFinances: false,
   canEditFinances: false,
   canViewVault: true,
   canEditVault: false,
@@ -40,13 +42,14 @@ export const defaultMemberPermissions: UserPermissions = {
   canManageBlockers: true,
   canCreateSubgroups: true,
   canDirectMessage: true,
+  canManageStartupSettings: false,
 };
 
 export const initialProfiles: Profile[] = [
   {
     id: 'p-1',
     full_name: 'Triumph Ugoji',
-    email: 'triumph@trackaa.com',
+    email: 'Trylonofficial@gmail.com', // Admin primary email
     role: 'Founder & CEO',
     department: 'Executive',
     hierarchy_path: 'Triumph > Trackaa > Executive > Founder & CEO',
@@ -62,15 +65,15 @@ export const initialProfiles: Profile[] = [
     email: 'mirabel@trackaa.com',
     role: 'PM 2',
     department: 'Dev team',
-    // Exact hierarchy pattern requested by user
     hierarchy_path: 'Mirabel > Trackaa > PM2 > Dev team',
     avatar_url: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80',
     active_status: 'online',
-    unread_count: 3, // Counter icon showing unread messages left for you
+    unread_count: 3,
     is_admin: false,
     permissions: {
       ...defaultMemberPermissions,
       canViewRoadmap: true,
+      canManageStartupSettings: true, // Mirabel granted startup settings access
     },
   },
   {
@@ -99,19 +102,6 @@ export const initialProfiles: Profile[] = [
     is_admin: false,
     permissions: defaultMemberPermissions,
   },
-  {
-    id: 'p-4',
-    full_name: 'Zainab Bello',
-    email: 'zainab@trackaa.com',
-    role: 'Growth & BD Lead',
-    department: 'Growth',
-    hierarchy_path: 'Zainab > Trackaa > BD Lead > Enterprise Pipelines',
-    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
-    active_status: 'offline',
-    unread_count: 1,
-    is_admin: false,
-    permissions: defaultMemberPermissions,
-  },
 ];
 
 export const initialStartups: Startup[] = [
@@ -120,12 +110,13 @@ export const initialStartups: Startup[] = [
     name: 'Trackaa',
     description: 'The all-in-one operating system for early-stage startup founders. Centralizing daily execution, blockers, pitch decks, customer feedback, and cash runway in one glassy workspace.',
     stage: 'beta',
-    status: 'velocity', // Gaining Velocity on the status ladder
+    status: 'velocity',
     priority: 'critical',
     due_date: '2026-12-15',
     logo_url: '/trackaa-mark-dark.png',
     website_url: 'https://trackaa.com',
     archived: false,
+    settings_access_user_ids: ['p-1', 'p-mirabel'],
     created_at: '2026-09-01T10:00:00Z',
   },
   {
@@ -133,12 +124,13 @@ export const initialStartups: Startup[] = [
     name: 'Solava CleanTech',
     description: 'Decentralized microgrid telemetry and smart battery swapping infrastructure for peri-urban mobility operators.',
     stage: 'validation',
-    status: 'on_track', // On Track / Steady
+    status: 'on_track',
     priority: 'high',
     due_date: '2026-11-30',
     logo_url: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=128&q=80',
     website_url: 'https://solava.energy',
     archived: false,
+    settings_access_user_ids: ['p-1'],
     created_at: '2026-08-15T09:00:00Z',
   },
   {
@@ -146,13 +138,95 @@ export const initialStartups: Startup[] = [
     name: 'Kake APIs',
     description: 'Real-time FX payment orchestration layer enabling cross-border B2B payouts within 90 seconds.',
     stage: 'series_a',
-    status: 'exceeding', // Exceeding Expectations
+    status: 'exceeding',
     priority: 'medium',
     due_date: '2026-10-25',
     logo_url: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=128&q=80',
     website_url: 'https://kakeapi.dev',
     archived: false,
+    settings_access_user_ids: ['p-1'],
     created_at: '2026-07-01T08:00:00Z',
+  },
+];
+
+// Post-it Bulletin Reports tacked onto the Startup Overview
+export const initialStatusReports: StatusReport[] = [
+  {
+    id: 'rep-1',
+    startup_id: 'startup-trackaa',
+    content: 'Meeting tomorrow at 10:00 AM with Bluecrest angel syndicate lead to review final SAFE terms.',
+    author_id: 'p-1',
+    author_name: 'Triumph Ugoji',
+    author_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80',
+    created_at: 'Today at 4:15 PM',
+    color: 'amber',
+  },
+  {
+    id: 'rep-2',
+    startup_id: 'startup-trackaa',
+    content: 'Pushed latest commit v2.1: Comms hub live with artifact attachment and Slack-style sub-groups.',
+    author_id: 'p-mirabel',
+    author_name: 'Mirabel Kalu',
+    author_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=128&q=80',
+    created_at: 'Today at 2:30 PM',
+    color: 'emerald',
+  },
+  {
+    id: 'rep-3',
+    startup_id: 'startup-trackaa',
+    content: 'AWS activate cloud grant credits confirmed ($25,000 added to working runway).',
+    author_id: 'p-3',
+    author_name: 'Marcus Chen',
+    author_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=128&q=80',
+    created_at: 'Yesterday at 6:40 PM',
+    color: 'blue',
+  },
+];
+
+export const initialMilestones: RoadmapMilestone[] = [
+  {
+    id: 'm-1',
+    project_id: 'startup-trackaa',
+    title: 'Customer Discovery & Multi-Tenant Alpha',
+    description: 'Conducted 35 founder problem interviews across YC and Techstars networks. Established multi-tenant isolation schema and early feedback loop.',
+    start_date: '2026-08-01',
+    end_date: '2026-09-15',
+    completed_date: '2026-09-10', // Beat target date early!
+    status: 'achieved',
+    conditions: [
+      { id: 'c-1', text: 'Interview at least 30 early-stage founders', completed: true },
+      { id: 'c-2', text: 'Validate cash runway ledger pain point', completed: true },
+      { id: 'c-3', text: 'Draft Delaware C-Corp incorporation files', completed: true },
+    ],
+  },
+  {
+    id: 'm-2',
+    project_id: 'startup-trackaa',
+    title: 'Trackaa v2.0 Glass UI & Finance Ledger Hub',
+    description: 'Implementation of the Apple-glass design system, unified Comms with artifact tagging, and Asset Vault.',
+    start_date: '2026-09-16',
+    end_date: '2026-11-01',
+    status: 'in_progress',
+    conditions: [
+      { id: 'c-4', text: 'Ship Comms hub with Slack-style artifact tagging', completed: true },
+      { id: 'c-5', text: 'Integrate dynamic 30-day runway projection', completed: true },
+      { id: 'c-6', text: 'Deploy role-based access control with temp passwords', completed: false },
+      { id: 'c-7', text: 'Conduct 10 usability walkthroughs with venture studios', completed: false },
+    ],
+  },
+  {
+    id: 'm-3',
+    project_id: 'startup-trackaa',
+    title: 'Public Beta Launch on Product Hunt',
+    description: 'Open onboarding for 500 venture studio and accelerator founders with real-time runway forecasting.',
+    start_date: '2026-11-02',
+    end_date: '2026-12-15',
+    status: 'planned',
+    conditions: [
+      { id: 'c-8', text: 'Prepare Hunter demo video and maker comment', completed: false },
+      { id: 'c-9', text: 'Achieve 99.9% uptime across production clusters', completed: false },
+      { id: 'c-10', text: 'Onboard first 50 paying studio teams', completed: false },
+    ],
   },
 ];
 
@@ -165,6 +239,12 @@ export const initialTasks: Task[] = [
     completed: false,
     priority: 'critical',
     assigned_to: 'p-1',
+    tagged_member_ids: ['p-mirabel', 'p-2'],
+    milestone_id: 'm-2',
+    milestone_condition_id: 'c-5',
+    attachments: [
+      { id: 'att-1', type: 'link', title: 'Investor Memo Doc', url: 'https://docs.google.com/document' },
+    ],
     created_at: '2026-10-12T10:00:00Z',
   },
   {
@@ -175,6 +255,9 @@ export const initialTasks: Task[] = [
     completed: true,
     priority: 'high',
     assigned_to: 'p-2',
+    tagged_member_ids: ['p-1'],
+    milestone_id: 'm-2',
+    milestone_condition_id: 'c-7',
     created_at: '2026-10-10T11:00:00Z',
   },
   {
@@ -185,6 +268,9 @@ export const initialTasks: Task[] = [
     completed: false,
     priority: 'medium',
     assigned_to: 'p-mirabel',
+    tagged_member_ids: ['p-3'],
+    milestone_id: 'm-2',
+    milestone_condition_id: 'c-4',
     created_at: '2026-10-09T08:30:00Z',
   },
   {
@@ -195,17 +281,8 @@ export const initialTasks: Task[] = [
     completed: false,
     priority: 'high',
     assigned_to: 'p-3',
+    milestone_id: 'm-2',
     created_at: '2026-10-14T14:00:00Z',
-  },
-  {
-    id: 't-5',
-    project_id: 'startup-trackaa',
-    title: 'Integrate dynamic 30-day burn rate calculator in Finance Hub',
-    due_date: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
-    completed: false,
-    priority: 'critical',
-    assigned_to: 'p-1',
-    created_at: '2026-10-15T09:00:00Z',
   },
 ];
 
@@ -231,36 +308,6 @@ export const initialBlockers: Blocker[] = [
   },
 ];
 
-export const initialMilestones: RoadmapMilestone[] = [
-  {
-    id: 'm-1',
-    project_id: 'startup-trackaa',
-    title: 'Alpha Architecture & Customer Discovery',
-    description: 'Validated 35 founder interviews, confirmed multi-tenant data isolation and core feature priorities.',
-    start_date: '2026-08-01',
-    end_date: '2026-09-15',
-    status: 'achieved',
-  },
-  {
-    id: 'm-2',
-    project_id: 'startup-trackaa',
-    title: 'Trackaa v2.0 Glass UI & Finance Ledger Hub',
-    description: 'Implementation of the Apple-glass design system, multi-file customer attachments, and Asset Vault.',
-    start_date: '2026-09-16',
-    end_date: '2026-11-01',
-    status: 'in_progress',
-  },
-  {
-    id: 'm-3',
-    project_id: 'startup-trackaa',
-    title: 'Public Beta Launch on Product Hunt',
-    description: 'Open onboarding for 500 venture studio and accelerator founders with real-time runway forecasting.',
-    start_date: '2026-11-02',
-    end_date: '2026-12-15',
-    status: 'planned',
-  },
-];
-
 export const initialInteractions: CustomerInteraction[] = [
   {
     id: 'ci-1',
@@ -274,26 +321,9 @@ export const initialInteractions: CustomerInteraction[] = [
     client_notes: '"We waste 4 hours every Monday consolidating Slack updates and Notion tables. If Trackaa gives us unified blocker audits, we will roll this out to all 8 studio companies."',
     attachment_urls: [
       'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=600&q=80',
-      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
     ],
     interaction_type: 'Demo & Pitch',
     created_at: '2026-10-14T15:30:00Z',
-  },
-  {
-    id: 'ci-2',
-    project_id: 'startup-trackaa',
-    customer_name: 'Liam O’Connor',
-    customer_role: 'Solo Founder, Apex Robotics (YC W26)',
-    date: '2026-10-12',
-    handler_id: 'p-2',
-    handler_name: 'Amara Vance',
-    handler_report: 'Liam noted that standard Jira is too bloated for pre-seed. He specifically requested quick status toggles right from the startup cards.',
-    client_notes: '"I need zero cognitive friction. Just let me toggle status from the badge without opening modal sheets."',
-    attachment_urls: [
-      'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80',
-    ],
-    interaction_type: 'User Interview',
-    created_at: '2026-10-12T11:00:00Z',
   },
 ];
 
@@ -324,30 +354,6 @@ export const initialAssets: StartupAsset[] = [
     created_by: 'p-1',
     created_at: '2026-09-02T14:15:00Z',
   },
-  {
-    id: 'a-3',
-    project_id: 'startup-trackaa',
-    title: 'Official Vector Brand Kit & Apple-Glass Guidelines',
-    category: 'brand',
-    asset_type: 'file',
-    file_url: '/trackaa-dark-logo.png',
-    file_size: 2600000,
-    file_extension: 'PNG',
-    tags: ['Logo', 'Brand Tokens'],
-    created_by: 'p-2',
-    created_at: '2026-10-15T18:00:00Z',
-  },
-  {
-    id: 'a-4',
-    project_id: 'startup-trackaa',
-    title: 'Figma Interactive Prototype (Founders Hub)',
-    category: 'links',
-    asset_type: 'link',
-    external_url: 'https://figma.com/@trackaa/founder-os',
-    tags: ['Design', 'UX', 'Figma'],
-    created_by: 'p-2',
-    created_at: '2026-10-13T16:00:00Z',
-  },
 ];
 
 export const initialFinances: StartupFinance[] = [
@@ -366,18 +372,6 @@ export const initialFinances: StartupFinance[] = [
   {
     id: 'f-2',
     project_id: 'startup-trackaa',
-    transaction_type: 'income',
-    category: 'grant',
-    amount: 25000,
-    currency: 'USD',
-    transaction_date: '2026-09-28',
-    description: 'AWS Activate & Google Cloud Startup Non-Dilutive Grant',
-    created_by: 'p-1',
-    created_at: '2026-09-28T14:30:00Z',
-  },
-  {
-    id: 'f-3',
-    project_id: 'startup-trackaa',
     transaction_type: 'expense',
     category: 'payroll',
     amount: 12500,
@@ -387,49 +381,50 @@ export const initialFinances: StartupFinance[] = [
     created_by: 'p-1',
     created_at: '2026-09-30T17:00:00Z',
   },
-  {
-    id: 'f-4',
-    project_id: 'startup-trackaa',
-    transaction_type: 'expense',
-    category: 'legal',
-    amount: 3200,
-    currency: 'USD',
-    transaction_date: '2026-10-02',
-    description: 'Legal filing & Delaware franchise tax reservation',
-    created_by: 'p-1',
-    created_at: '2026-10-02T11:00:00Z',
-  },
 ];
 
-// Comms Channels: Common Room + Sub-groups
+// Per-Startup Isolated Comms Channels & Common Rooms
 export const initialChannels: ChatChannel[] = [
+  // Trackaa Channels
   {
-    id: 'common-room',
+    id: 'common-room-trackaa',
     startup_id: 'startup-trackaa',
-    name: 'Common Room',
-    description: 'The general startup town hall. Every added member automatically joins here.',
+    name: 'Common Room (Trackaa)',
+    description: 'The general town hall for Trackaa members.',
     is_common_room: true,
     is_subgroup: false,
     created_by: 'p-1',
-    member_ids: ['p-1', 'p-mirabel', 'p-2', 'p-3', 'p-4'],
+    member_ids: ['p-1', 'p-mirabel', 'p-2', 'p-3'],
   },
   {
-    id: 'sub-dev-team',
+    id: 'sub-dev-trackaa',
     startup_id: 'startup-trackaa',
     name: 'dev-team',
-    description: 'Engineering sprint sync, architecture specs, and deployments.',
+    description: 'Trackaa engineering sprint sync and deployments.',
     is_common_room: false,
     is_subgroup: true,
     created_by: 'p-mirabel',
     member_ids: ['p-1', 'p-mirabel', 'p-3'],
   },
+  // Solava Channels
   {
-    id: 'sub-fundraising',
-    startup_id: 'startup-trackaa',
-    name: 'fundraising-safe',
-    description: 'Pre-Seed SAFE lead memos, angel meetings, and cap table notes.',
-    is_common_room: false,
-    is_subgroup: true,
+    id: 'common-room-solava',
+    startup_id: 'startup-solava',
+    name: 'Common Room (Solava)',
+    description: 'The general town hall for Solava CleanTech team.',
+    is_common_room: true,
+    is_subgroup: false,
+    created_by: 'p-1',
+    member_ids: ['p-1', 'p-3'],
+  },
+  // Kake Channels
+  {
+    id: 'common-room-kake',
+    startup_id: 'startup-kake',
+    name: 'Common Room (Kake)',
+    description: 'The general town hall for Kake APIs team.',
+    is_common_room: true,
+    is_subgroup: false,
     created_by: 'p-1',
     member_ids: ['p-1', 'p-2'],
   },
@@ -439,7 +434,7 @@ export const initialMessages: ChatMessage[] = [
   {
     id: 'msg-1',
     startup_id: 'startup-trackaa',
-    channel_id: 'common-room',
+    channel_id: 'common-room-trackaa',
     sender_id: 'p-1',
     sender_name: 'Triumph Ugoji',
     sender_avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
@@ -450,7 +445,7 @@ export const initialMessages: ChatMessage[] = [
   {
     id: 'msg-2',
     startup_id: 'startup-trackaa',
-    channel_id: 'common-room',
+    channel_id: 'common-room-trackaa',
     sender_id: 'p-mirabel',
     sender_name: 'Mirabel Kalu',
     sender_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80',
@@ -468,7 +463,7 @@ export const initialMessages: ChatMessage[] = [
   {
     id: 'msg-3',
     startup_id: 'startup-trackaa',
-    dm_user_id: 'p-1', // Sent as DM to Triumph from Mirabel
+    dm_user_id: 'p-1',
     sender_id: 'p-mirabel',
     sender_name: 'Mirabel Kalu',
     sender_avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80',
@@ -485,20 +480,11 @@ export const initialMessages: ChatMessage[] = [
   },
   {
     id: 'msg-4',
-    startup_id: 'startup-trackaa',
-    channel_id: 'sub-dev-team',
-    sender_id: 'p-3',
-    sender_name: 'Marcus Chen',
-    sender_avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=256&q=80',
-    sender_hierarchy: 'Marcus > Trackaa > Tech Lead > Backend Infrastructure',
-    text: 'Stripe webhook issue resolved. Check out this blocker audit narrative.',
-    timestamp: '11:05 AM',
-    attachment: {
-      type: 'blocker',
-      id: 'b-1',
-      title: 'Delaware C-Corp banking account authorization verification',
-      subtitle: 'Status: Cleared & Documented',
-      metadata: 'Severity: High',
-    },
+    startup_id: 'startup-solava',
+    channel_id: 'common-room-solava',
+    sender_id: 'p-1',
+    sender_name: 'Triumph Ugoji',
+    text: 'Solava telemetry testbed deployment starts this Friday.',
+    timestamp: 'Yesterday at 3:10 PM',
   },
 ];

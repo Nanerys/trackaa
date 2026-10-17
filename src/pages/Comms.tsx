@@ -22,10 +22,14 @@ import {
   X,
   Sparkles,
   UserPlus,
+  Briefcase,
 } from 'lucide-react';
 
 export const Comms: React.FC = () => {
   const {
+    startups,
+    currentStartupId,
+    setCurrentStartupId,
     currentStartup,
     profiles,
     channels,
@@ -43,14 +47,35 @@ export const Comms: React.FC = () => {
   } = useApp();
 
   // Active channel or DM target
-  const [activeChannelId, setActiveChannelId] = useState<string>('common-room');
+  const activeStartup = currentStartup || startups[0];
+  const startupChannels = channels.filter(
+    c => c.startup_id === (activeStartup?.id || 'startup-trackaa')
+  );
+  const defaultCommonRoom =
+    startupChannels.find(c => c.is_common_room) || startupChannels[0];
+
+  const [activeChannelId, setActiveChannelId] = useState<string>(
+    defaultCommonRoom?.id || 'common-room-trackaa'
+  );
   const [activeDmUserId, setActiveDmUserId] = useState<string | null>(null);
+
+  // Sync active channel when startup changes
+  useEffect(() => {
+    if (activeStartup && !activeDmUserId) {
+      const room = startupChannels.find(c => c.is_common_room) || startupChannels[0];
+      if (room) {
+        setActiveChannelId(room.id);
+      }
+    }
+  }, [activeStartup?.id]);
 
   // Message composer
   const [inputText, setInputText] = useState('');
   const [selectedAttachment, setSelectedAttachment] = useState<ChatAttachment | null>(null);
   const [isAttachDrawerOpen, setIsAttachDrawerOpen] = useState(false);
-  const [attachCategory, setAttachCategory] = useState<'task' | 'finance' | 'blocker' | 'interaction' | 'asset'>('task');
+  const [attachCategory, setAttachCategory] = useState<
+    'task' | 'finance' | 'blocker' | 'interaction' | 'asset'
+  >('task');
 
   // Modals
   const [isNewSubgroupOpen, setIsNewSubgroupOpen] = useState(false);
@@ -63,7 +88,7 @@ export const Comms: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Filter messages based on active channel or active DM
+  // Filter messages based on active startup, channel, or direct message
   const currentMessages = messages.filter(m => {
     if (activeDmUserId) {
       return (
@@ -71,10 +96,13 @@ export const Comms: React.FC = () => {
         (m.sender_id === activeDmUserId && (m.dm_user_id === currentUser.id || !m.channel_id))
       );
     }
-    return m.channel_id === activeChannelId;
+    return (
+      m.startup_id === (activeStartup?.id || 'startup-trackaa') &&
+      m.channel_id === activeChannelId
+    );
   });
 
-  const activeChannel = channels.find(c => c.id === activeChannelId);
+  const activeChannel = startupChannels.find(c => c.id === activeChannelId);
   const activeDmUser = profiles.find(p => p.id === activeDmUserId);
 
   useEffect(() => {
@@ -97,13 +125,15 @@ export const Comms: React.FC = () => {
     if (!inputText.trim() && !selectedAttachment) return;
 
     sendMessage({
-      startup_id: currentStartup?.id || 'startup-trackaa',
+      startup_id: activeStartup?.id || 'startup-trackaa',
       channel_id: activeDmUserId ? undefined : activeChannelId,
       dm_user_id: activeDmUserId || undefined,
       sender_id: currentUser.id,
       sender_name: currentUser.full_name,
       sender_avatar: currentUser.avatar_url,
-      sender_hierarchy: currentUser.hierarchy_path || `${currentUser.full_name} > Trackaa > Founder`,
+      sender_hierarchy:
+        currentUser.hierarchy_path ||
+        `${currentUser.full_name} > ${activeStartup?.name || 'Trackaa'} > Founder`,
       text: inputText.trim(),
       attachment: selectedAttachment || undefined,
     });
@@ -133,21 +163,41 @@ export const Comms: React.FC = () => {
         (p.department && p.department.toLowerCase().includes(searchMember.toLowerCase())))
   );
 
+  // Filtered artifacts belonging strictly to this startup
+  const startupTasks = tasks.filter(t => t.project_id === activeStartup?.id);
+  const startupFinances = finances.filter(f => f.project_id === activeStartup?.id);
+  const startupBlockers = blockers.filter(b => b.project_id === activeStartup?.id);
+  const startupAssets = assets.filter(a => a.project_id === activeStartup?.id);
+  const startupInteractions = interactions.filter(ci => ci.project_id === activeStartup?.id);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 h-[calc(100vh-5rem)] flex flex-col animate-fade-in">
-      {/* Top Banner */}
-      <div className="flex items-center justify-between pb-4 border-b border-black/5 dark:border-white/10">
+      {/* Top Banner with Venture Switcher */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-black/5 dark:border-white/10 gap-3">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               Comms Hub
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-trackaa-green text-white shadow-sm">
-              Unified OS Communications
-            </span>
+
+            {/* Per-Startup Active Switcher */}
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-2xl bg-trackaa-green/10 border border-trackaa-green/30">
+              <Briefcase className="w-3.5 h-3.5 text-trackaa-green" />
+              <select
+                value={activeStartup?.id}
+                onChange={e => setCurrentStartupId(e.target.value)}
+                className="bg-transparent text-xs font-bold text-trackaa-green focus:outline-none cursor-pointer"
+              >
+                {startups.map(s => (
+                  <option key={s.id} value={s.id} className="text-slate-900 bg-white dark:bg-slate-900">
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Real-time DMs, Common Room town hall, and contextual startup artifact tagging
+            Isolated town hall, team DMs, and startup artifact tagging for {activeStartup?.name}
           </p>
         </div>
 
@@ -208,11 +258,11 @@ export const Comms: React.FC = () => {
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
             </div>
 
-            {/* Channels & Common Room */}
+            {/* Channels & Common Room strictly for active startup */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Town Hall & Channels
+                  {activeStartup?.name} Town Hall
                 </span>
                 <button
                   type="button"
@@ -225,7 +275,7 @@ export const Comms: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                {channels.map(chan => {
+                {startupChannels.map(chan => {
                   const isActive = !activeDmUserId && activeChannelId === chan.id;
                   return (
                     <button
@@ -247,10 +297,14 @@ export const Comms: React.FC = () => {
                       )}
                       <span className="flex-1 truncate">{chan.name}</span>
                       {chan.is_common_room && (
-                        <span className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
-                          isActive ? 'bg-white/20 text-white' : 'bg-black/5 dark:bg-white/10 text-slate-400'
-                        }`}>
-                          All
+                        <span
+                          className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                            isActive
+                              ? 'bg-white/20 text-white'
+                              : 'bg-black/5 dark:bg-white/10 text-slate-400'
+                          }`}
+                        >
+                          Common Room
                         </span>
                       )}
                     </button>
@@ -259,49 +313,46 @@ export const Comms: React.FC = () => {
               </div>
             </div>
 
-            {/* Direct Messages with Member Hierarchy & Head Counters */}
+            {/* Team Direct Messages */}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Direct Messages (DMs)
+                  Direct Messages
                 </span>
-                <span className="text-[10px] text-slate-400">{filteredProfiles.length} Members</span>
+                <span className="text-[10px] text-slate-400">
+                  {profiles.filter(p => p.active_status === 'online').length} online
+                </span>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {filteredProfiles.map(member => {
                   const isActive = activeDmUserId === member.id;
-                  const unread = member.unread_count || 0;
+                  const unreadCount = member.unread_count || 0;
 
                   return (
                     <button
                       key={member.id}
                       type="button"
                       onClick={() => handleSelectDm(member)}
-                      className={`w-full p-2.5 rounded-2xl text-left transition-all flex items-center gap-3 relative group ${
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-all ${
                         isActive
-                          ? 'bg-black/10 dark:bg-white/15 ring-1 ring-trackaa-green/40 shadow-sm'
-                          : 'hover:bg-black/5 dark:hover:bg-white/5'
+                          ? 'bg-white/15 dark:bg-white/15 text-slate-900 dark:text-white font-semibold shadow-sm ring-1 ring-black/5'
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/5'
                       }`}
                     >
-                      {/* Avatar with unread message counter over their head & active status light */}
+                      {/* Avatar with live status indicator & head counter badge */}
                       <div className="relative flex-shrink-0">
                         <img
-                          src={member.avatar_url}
+                          src={
+                            member.avatar_url ||
+                            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80'
+                          }
                           alt={member.full_name}
-                          className="w-10 h-10 rounded-2xl object-cover ring-1 ring-black/10 dark:ring-white/10"
+                          className="w-8 h-8 rounded-xl object-cover ring-1 ring-black/10 dark:ring-white/10"
                         />
-
-                        {/* Unread Message Counter Icon OVER THEIR HEAD */}
-                        {unread > 0 && (
-                          <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-600 text-white font-extrabold text-[10px] flex items-center justify-center shadow-md animate-bounce ring-2 ring-white dark:ring-[#111827]">
-                            {unread}
-                          </div>
-                        )}
-
-                        {/* Active status indicator light */}
+                        {/* Active presence light */}
                         <div
-                          className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-[#111827] ${
+                          className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-[#111827] ${
                             member.active_status === 'online'
                               ? 'bg-trackaa-green'
                               : member.active_status === 'away'
@@ -309,21 +360,21 @@ export const Comms: React.FC = () => {
                               : 'bg-slate-400'
                           }`}
                         />
+                        {/* Unread Head Counter Badge */}
+                        {unreadCount > 0 && (
+                          <div className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-extrabold flex items-center justify-center shadow-md animate-pulse">
+                            {unreadCount}
+                          </div>
+                        )}
                       </div>
 
-                      {/* Name, Role & Hierarchy Breadcrumbs */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                            {member.full_name}
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-mono capitalize">
-                            {member.active_status}
-                          </span>
+                          <span className="text-xs font-semibold truncate">{member.full_name}</span>
+                          <span className="text-[10px] text-slate-400 truncate ml-1">{member.role}</span>
                         </div>
-
-                        {/* Exact hierarchy format requested by user: Mirabel > Trackaa > PM2 > Dev team */}
-                        <div className="text-[10px] font-mono text-trackaa-green truncate mt-0.5">
+                        {/* Hierarchy breadcrumb */}
+                        <div className="text-[10px] text-slate-400 font-mono truncate">
                           {member.hierarchy_path || `${member.full_name} > Trackaa > ${member.role}`}
                         </div>
                       </div>
@@ -333,67 +384,116 @@ export const Comms: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Current User Card at bottom of sidebar */}
+          <div className="pt-3 border-t border-black/5 dark:border-white/10 flex items-center justify-between">
+            <div className="flex items-center gap-2 min-w-0">
+              <img
+                src={
+                  currentUser.avatar_url ||
+                  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80'
+                }
+                alt={currentUser.full_name}
+                className="w-7 h-7 rounded-xl object-cover"
+              />
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                  {currentUser.full_name}
+                </div>
+                <div className="text-[10px] text-slate-400 truncate">{currentUser.role}</div>
+              </div>
+            </div>
+
+            <span className="text-[10px] font-semibold text-trackaa-green uppercase px-1.5 py-0.5 rounded bg-trackaa-green/10">
+              Founder
+            </span>
+          </div>
         </div>
 
-        {/* Right Area: Conversation Stream & Composer (Cols 8) */}
-        <div className="md:col-span-8 lg:col-span-8 rounded-3xl glass-panel flex flex-col justify-between overflow-hidden border border-black/5 dark:border-white/10">
-          {/* Conversation Header */}
-          <div className="p-4 border-b border-black/5 dark:border-white/10 flex items-center justify-between backdrop-blur-xl">
+        {/* Right Main Chat Area (Cols 8) */}
+        <div className="md:col-span-8 lg:col-span-8 rounded-3xl glass-panel flex flex-col justify-between overflow-hidden border border-black/5 dark:border-white/10 relative">
+          {/* Channel / DM Header */}
+          <div className="p-4 border-b border-black/5 dark:border-white/10 flex items-center justify-between bg-black/5 dark:bg-white/5">
             <div className="flex items-center gap-3">
               {activeDmUser ? (
-                <div className="relative">
-                  <img
-                    src={activeDmUser.avatar_url}
-                    alt={activeDmUser.full_name}
-                    className="w-10 h-10 rounded-2xl object-cover ring-1 ring-black/10 dark:ring-white/10"
-                  />
-                  <div
-                    className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-[#111827] ${
-                      activeDmUser.active_status === 'online'
-                        ? 'bg-trackaa-green'
-                        : activeDmUser.active_status === 'away'
-                        ? 'bg-amber-400'
-                        : 'bg-slate-400'
-                    }`}
-                  />
-                </div>
+                <>
+                  <div className="relative">
+                    <img
+                      src={
+                        activeDmUser.avatar_url ||
+                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80'
+                      }
+                      alt={activeDmUser.full_name}
+                      className="w-9 h-9 rounded-xl object-cover ring-1 ring-black/10 dark:ring-white/10"
+                    />
+                    <div
+                      className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-[#111827] ${
+                        activeDmUser.active_status === 'online'
+                          ? 'bg-trackaa-green'
+                          : activeDmUser.active_status === 'away'
+                          ? 'bg-amber-400'
+                          : 'bg-slate-400'
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                      <span>{activeDmUser.full_name}</span>
+                      <span className="text-[10px] font-normal text-slate-400">({activeDmUser.email})</span>
+                    </h2>
+                    <div className="text-[11px] text-trackaa-green font-mono">
+                      {activeDmUser.hierarchy_path || `${activeDmUser.full_name} > Trackaa > ${activeDmUser.role}`}
+                    </div>
+                  </div>
+                </>
               ) : (
-                <div className="w-10 h-10 rounded-2xl bg-trackaa-green/15 text-trackaa-green flex items-center justify-center font-bold">
-                  {activeChannel?.is_common_room ? <Users className="w-5 h-5" /> : <Hash className="w-5 h-5" />}
-                </div>
+                <>
+                  <div className="w-9 h-9 rounded-xl bg-trackaa-green/15 text-trackaa-green flex items-center justify-center font-bold">
+                    {activeChannel?.is_common_room ? (
+                      <Users className="w-5 h-5 text-trackaa-green" />
+                    ) : (
+                      <Hash className="w-5 h-5 text-trackaa-green" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                        {activeChannel?.name || 'Common Room'}
+                      </h2>
+                      {activeChannel?.is_common_room && (
+                        <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-trackaa-green text-white">
+                          Town Hall
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      {activeChannel?.description || 'All startup members have automated access.'}
+                    </p>
+                  </div>
+                </>
               )}
+            </div>
 
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                    {activeDmUser ? activeDmUser.full_name : activeChannel?.name}
-                  </h2>
-                  {activeDmUser && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-trackaa-green font-semibold">
-                      {activeDmUser.active_status}
-                    </span>
-                  )}
-                </div>
-
-                {/* Subtitle / Hierarchy breadcrumb */}
-                <div className="text-[11px] text-slate-400 font-mono">
-                  {activeDmUser
-                    ? activeDmUser.hierarchy_path || `${activeDmUser.full_name} > Trackaa > ${activeDmUser.role}`
-                    : activeChannel?.description}
-                </div>
-              </div>
+            <div className="text-right">
+              <span className="text-[10px] font-mono text-slate-400 block">
+                {activeStartup?.name} OS Scope
+              </span>
             </div>
           </div>
 
-          {/* Message Stream */}
-          <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
+          {/* Messages Stream */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
             {currentMessages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center p-8 text-slate-400">
-                <MessageSquare className="w-10 h-10 mb-2 opacity-40 text-trackaa-green" />
-                <div className="text-xs font-semibold">No messages yet in this room</div>
-                <div className="text-[11px] mt-1 max-w-xs">
-                  Break the ice or attach a task, pitch deck, or blocker from your startup workspace!
+              <div className="h-full flex flex-col items-center justify-center text-center p-8">
+                <div className="w-12 h-12 rounded-2xl bg-trackaa-green/10 text-trackaa-green flex items-center justify-center mb-3">
+                  <MessageSquare className="w-6 h-6" />
                 </div>
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  No messages in this thread yet
+                </h3>
+                <p className="text-xs text-slate-400 max-w-xs mt-1">
+                  Tag tasks, blockers, receipts, or legal SAFE docs to align your team without meeting fatigue.
+                </p>
               </div>
             ) : (
               currentMessages.map(msg => {
@@ -402,58 +502,62 @@ export const Comms: React.FC = () => {
                 return (
                   <div
                     key={msg.id}
-                    className={`flex items-start gap-3 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}
+                    className={`flex items-start gap-3 ${isMe ? 'flex-row-reverse' : ''}`}
                   >
                     <img
-                      src={msg.sender_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80'}
+                      src={
+                        msg.sender_avatar ||
+                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=128&q=80'
+                      }
                       alt={msg.sender_name}
                       className="w-8 h-8 rounded-xl object-cover flex-shrink-0"
                     />
 
-                    <div className={`max-w-[75%] ${isMe ? 'items-end' : 'items-start'} flex flex-col`}>
-                      <div className="flex items-center gap-2 mb-1 px-1">
-                        <span className="text-[11px] font-bold text-slate-900 dark:text-white">
-                          {msg.sender_name}
+                    <div className={`max-w-md space-y-1.5 ${isMe ? 'items-end' : ''}`}>
+                      {/* Sender Metadata */}
+                      <div
+                        className={`flex items-center gap-2 text-[10px] ${
+                          isMe ? 'flex-row-reverse justify-end' : ''
+                        }`}
+                      >
+                        <span className="font-bold text-slate-900 dark:text-white">
+                          {isMe ? 'You' : msg.sender_name}
                         </span>
-                        <span className="text-[10px] text-slate-400">{msg.timestamp}</span>
+                        <span className="text-slate-400">{msg.timestamp}</span>
                       </div>
 
                       {/* Bubble */}
                       <div
-                        className={`rounded-2xl p-3 text-xs leading-relaxed shadow-sm ${
+                        className={`p-3.5 rounded-2xl text-xs leading-relaxed shadow-sm ${
                           isMe
-                            ? 'bg-trackaa-green text-white rounded-tr-sm'
-                            : 'bg-black/5 dark:bg-white/10 text-slate-900 dark:text-slate-100 rounded-tl-sm border border-black/5 dark:border-white/10'
+                            ? 'bg-trackaa-navy text-white rounded-tr-none border border-trackaa-green/30'
+                            : 'bg-white/80 dark:bg-white/10 text-slate-800 dark:text-slate-200 rounded-tl-none border border-black/5 dark:border-white/10'
                         }`}
                       >
                         <p>{msg.text}</p>
 
-                        {/* Rich Attached Startup OS Artifact Preview */}
+                        {/* Tagged Startup Artifact Card */}
                         {msg.attachment && (
-                          <div
-                            className={`mt-2.5 p-2.5 rounded-xl border flex items-start gap-2.5 text-xs ${
-                              isMe
-                                ? 'bg-black/20 border-white/20 text-white'
-                                : 'bg-black/5 dark:bg-black/20 border-black/10 dark:border-white/10 text-slate-900 dark:text-white'
-                            }`}
-                          >
-                            <div className="p-1.5 rounded-lg bg-white/20 flex-shrink-0 mt-0.5">
+                          <div className="mt-2.5 p-2.5 rounded-xl bg-black/10 dark:bg-black/30 border border-white/10 flex items-start gap-2.5">
+                            <div className="w-7 h-7 rounded-lg bg-trackaa-green/20 text-trackaa-green flex items-center justify-center flex-shrink-0">
                               {msg.attachment.type === 'task' && <CheckSquare className="w-3.5 h-3.5" />}
                               {msg.attachment.type === 'finance' && <DollarSign className="w-3.5 h-3.5" />}
                               {msg.attachment.type === 'blocker' && <AlertOctagon className="w-3.5 h-3.5" />}
-                              {msg.attachment.type === 'interaction' && <MessageSquare className="w-3.5 h-3.5" />}
                               {msg.attachment.type === 'asset' && <FolderLock className="w-3.5 h-3.5" />}
-                              {msg.attachment.type === 'common_ref' && <Users className="w-3.5 h-3.5" />}
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <div className="font-bold truncate">{msg.attachment.title}</div>
-                              {msg.attachment.subtitle && (
-                                <div className="text-[10px] opacity-80">{msg.attachment.subtitle}</div>
+                              {msg.attachment.type === 'interaction' && (
+                                <MessageSquare className="w-3.5 h-3.5" />
                               )}
-                              {msg.attachment.metadata && (
-                                <div className="text-[10px] font-mono mt-0.5 opacity-70">
-                                  {msg.attachment.metadata}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-trackaa-green block">
+                                Attached {msg.attachment.type}
+                              </span>
+                              <div className="font-bold truncate text-white">
+                                {msg.attachment.title}
+                              </div>
+                              {msg.attachment.subtitle && (
+                                <div className="text-[10px] text-slate-300 truncate">
+                                  {msg.attachment.subtitle}
                                 </div>
                               )}
                             </div>
@@ -468,70 +572,72 @@ export const Comms: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Composer & Contextual Attachment Engine */}
-          <div className="p-4 border-t border-black/5 dark:border-white/10 backdrop-blur-xl relative">
-            {/* Active Attachment Chip */}
+          {/* Bottom Composer & Attachment Drawer */}
+          <div className="p-3 sm:p-4 border-t border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5 space-y-2">
+            {/* Selected Attachment Pill Preview */}
             {selectedAttachment && (
-              <div className="mb-2 p-2 rounded-xl bg-trackaa-green/10 border border-trackaa-green/30 flex items-center justify-between text-xs text-trackaa-green">
+              <div className="flex items-center justify-between p-2 rounded-xl bg-trackaa-green/15 border border-trackaa-green/40 text-xs animate-fade-in">
                 <div className="flex items-center gap-2 truncate">
-                  <span className="font-bold capitalize">Attached {selectedAttachment.type}:</span>
-                  <span className="truncate">{selectedAttachment.title}</span>
+                  <Paperclip className="w-3.5 h-3.5 text-trackaa-green flex-shrink-0" />
+                  <span className="font-semibold text-trackaa-green truncate">
+                    Attached [{selectedAttachment.type}]: {selectedAttachment.title}
+                  </span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedAttachment(null)}
-                  className="p-1 hover:text-rose-500"
+                  className="text-slate-400 hover:text-white p-1"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
 
-            {/* Attachment Drawer Modal / Popover */}
+            {/* Artifact Selection Drawer */}
             {isAttachDrawerOpen && (
-              <div className="absolute bottom-16 left-4 right-4 sm:left-6 sm:w-96 glass-dropdown rounded-3xl p-4 shadow-2xl border border-white/15 z-50 animate-slide-up">
-                <div className="flex items-center justify-between pb-2 border-b border-black/5 dark:border-white/10 mb-3">
+              <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-black/10 dark:border-white/10 shadow-xl space-y-3 animate-slide-up">
+                <div className="flex items-center justify-between pb-2 border-b border-black/5 dark:border-white/10">
                   <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <Paperclip className="w-3.5 h-3.5 text-trackaa-green" />
-                    <span>Tag from Startup Environment</span>
+                    <Sparkles className="w-3.5 h-3.5 text-trackaa-green" />
+                    <span>Tag from {activeStartup?.name} OS</span>
                   </span>
                   <button
                     type="button"
                     onClick={() => setIsAttachDrawerOpen(false)}
-                    className="p-1 text-slate-400 hover:text-white"
+                    className="text-slate-400 hover:text-white"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
                 {/* Category Pills */}
-                <div className="flex gap-1 overflow-x-auto pb-2 mb-2">
+                <div className="flex items-center gap-1 overflow-x-auto pb-1 text-xs">
                   {[
-                    { id: 'task', label: 'Task' },
-                    { id: 'finance', label: 'Receipt' },
-                    { id: 'blocker', label: 'Blocker' },
-                    { id: 'asset', label: 'Vault' },
-                    { id: 'interaction', label: 'Feedback' },
+                    { id: 'task', label: 'Tasks', count: startupTasks.length },
+                    { id: 'finance', label: 'Receipts / Ledger', count: startupFinances.length },
+                    { id: 'blocker', label: 'Blockers', count: startupBlockers.length },
+                    { id: 'asset', label: 'Vault Assets', count: startupAssets.length },
+                    { id: 'interaction', label: 'Feedback', count: startupInteractions.length },
                   ].map(cat => (
                     <button
                       key={cat.id}
                       type="button"
                       onClick={() => setAttachCategory(cat.id as any)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
+                      className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition-all ${
                         attachCategory === cat.id
-                          ? 'bg-trackaa-green text-white shadow-sm'
+                          ? 'bg-trackaa-green text-white font-bold'
                           : 'bg-black/5 dark:bg-white/5 text-slate-400 hover:text-white'
                       }`}
                     >
-                      {cat.label}
+                      {cat.label} ({cat.count})
                     </button>
                   ))}
                 </div>
 
-                {/* Item List to pick from */}
-                <div className="max-h-52 overflow-y-auto space-y-1.5 pr-1">
+                {/* Category Items List */}
+                <div className="max-h-40 overflow-y-auto space-y-1 pr-1">
                   {attachCategory === 'task' &&
-                    tasks.map(t => (
+                    startupTasks.map(t => (
                       <button
                         key={t.id}
                         type="button"
@@ -540,7 +646,7 @@ export const Comms: React.FC = () => {
                             type: 'task',
                             id: t.id,
                             title: t.title,
-                            subtitle: `Due: ${t.due_date} • Priority: ${t.priority}`,
+                            subtitle: `Due ${t.due_date} • Priority: ${t.priority}`,
                           });
                           setIsAttachDrawerOpen(false);
                         }}
@@ -552,7 +658,7 @@ export const Comms: React.FC = () => {
                     ))}
 
                   {attachCategory === 'finance' &&
-                    finances.map(f => (
+                    startupFinances.map(f => (
                       <button
                         key={f.id}
                         type="button"
@@ -573,7 +679,7 @@ export const Comms: React.FC = () => {
                     ))}
 
                   {attachCategory === 'blocker' &&
-                    blockers.map(b => (
+                    startupBlockers.map(b => (
                       <button
                         key={b.id}
                         type="button"
@@ -594,7 +700,7 @@ export const Comms: React.FC = () => {
                     ))}
 
                   {attachCategory === 'asset' &&
-                    assets.map(a => (
+                    startupAssets.map(a => (
                       <button
                         key={a.id}
                         type="button"
@@ -615,7 +721,7 @@ export const Comms: React.FC = () => {
                     ))}
 
                   {attachCategory === 'interaction' &&
-                    interactions.map(ci => (
+                    startupInteractions.map(ci => (
                       <button
                         key={ci.id}
                         type="button"
@@ -678,7 +784,9 @@ export const Comms: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in">
           <div className="relative w-full max-w-md glass-dropdown rounded-3xl p-6 shadow-2xl border border-white/15 animate-slide-up">
             <div className="flex items-center justify-between pb-3 border-b border-black/5 dark:border-white/10">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white">Create Comms Sub-Group</h2>
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                Create {activeStartup?.name} Sub-Group
+              </h2>
               <button
                 type="button"
                 onClick={() => setIsNewSubgroupOpen(false)}
@@ -697,7 +805,7 @@ export const Comms: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="e.g., growth-sprint, design-critique"
+                    placeholder="e.g., growth-sprint, dev-sync"
                     value={newSubgroupName}
                     onChange={e => setNewSubgroupName(e.target.value)}
                     className="w-full pl-7 pr-3 py-2 rounded-xl text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-trackaa-green/40"

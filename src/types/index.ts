@@ -19,7 +19,6 @@ export type StatusLadderRung =
   | 'velocity'   // Gaining Velocity
   | 'exceeding'; // Exceeding Expectations
 
-// Legacy alias for compatibility
 export type StartupStatus = StatusLadderRung | 'not-started' | 'in-progress' | 'blocked' | 'complete';
 
 export type PriorityLevel = 'low' | 'medium' | 'high' | 'critical';
@@ -38,6 +37,7 @@ export interface UserPermissions {
   canManageBlockers: boolean;
   canCreateSubgroups: boolean;
   canDirectMessage: boolean;
+  canManageStartupSettings?: boolean;
 }
 
 export type ActiveStatus = 'online' | 'offline' | 'away';
@@ -48,15 +48,25 @@ export interface Profile {
   email: string;
   role: string;
   department?: string;
-  // Organizational hierarchy breadcrumbs (e.g. "Mirabel > Trackaa > PM2 > Dev team >")
   hierarchy_path?: string;
   avatar_url?: string;
   active_status?: ActiveStatus;
-  // Counter icon over their head showing unread messages left for you
   unread_count?: number;
   permissions?: UserPermissions;
   temporary_password?: string;
   is_admin?: boolean;
+}
+
+// Pinned Status Report (Post-it note style status update)
+export interface StatusReport {
+  id: string;
+  startup_id: string;
+  content: string; // e.g. "Meeting tomorrow 10am with investor lead", "Pushed v2.1 commit"
+  author_id: string;
+  author_name: string;
+  author_avatar?: string;
+  created_at: string;
+  color?: 'amber' | 'emerald' | 'blue' | 'rose' | 'purple';
 }
 
 export interface Startup {
@@ -70,8 +80,16 @@ export interface Startup {
   logo_url?: string;
   website_url?: string;
   archived: boolean;
+  settings_access_user_ids?: string[]; // Team members given access to edit startup settings
   created_at: string;
   updated_at?: string;
+}
+
+export interface TaskAttachment {
+  id: string;
+  type: 'link' | 'file';
+  title: string;
+  url: string;
 }
 
 export interface Task {
@@ -82,6 +100,10 @@ export interface Task {
   completed: boolean;
   priority: PriorityLevel;
   assigned_to?: string; // Profile ID
+  tagged_member_ids?: string[]; // Tagged collaborators
+  attachments?: TaskAttachment[]; // Links and documents attached directly
+  milestone_id?: string; // Attached milestone
+  milestone_condition_id?: string; // Specific milestone condition fulfilled
   created_at: string;
 }
 
@@ -96,6 +118,12 @@ export interface Blocker {
   resolved_at?: string;
 }
 
+export interface MilestoneCondition {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
 export interface RoadmapMilestone {
   id: string;
   project_id: string;
@@ -103,7 +131,9 @@ export interface RoadmapMilestone {
   description: string;
   start_date: string;
   end_date: string;
+  completed_date?: string; // Date milestone was achieved to show if beaten early or overdue
   status: 'planned' | 'in_progress' | 'achieved' | 'delayed';
+  conditions?: MilestoneCondition[]; // Checklist of conditions needed to meet this milestone
 }
 
 export interface CustomerInteraction {
@@ -116,7 +146,7 @@ export interface CustomerInteraction {
   handler_name: string;
   handler_report: string;
   client_notes: string;
-  attachment_urls: string[]; // Up to 5 files/screenshots
+  attachment_urls: string[];
   interaction_type: string;
   created_at: string;
 }
@@ -179,9 +209,9 @@ export interface ChatAttachment {
 
 export interface ChatMessage {
   id: string;
-  startup_id: string;
+  startup_id: string; // Scoped strictly to that startup!
   channel_id?: string; // e.g. 'common-room' or sub-group id
-  dm_user_id?: string; // Target user ID for DMs
+  dm_user_id?: string;
   sender_id: string;
   sender_name: string;
   sender_avatar?: string;
@@ -193,7 +223,7 @@ export interface ChatMessage {
 
 export interface ChatChannel {
   id: string;
-  startup_id: string;
+  startup_id: string; // Scoped strictly to that startup!
   name: string;
   description: string;
   is_common_room: boolean;

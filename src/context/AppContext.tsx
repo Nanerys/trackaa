@@ -13,6 +13,7 @@ import {
   StatusLadderRung,
   ChatChannel,
   ChatMessage,
+  StatusReport,
   UserPermissions,
   ActiveStatus,
 } from '../types';
@@ -27,6 +28,7 @@ import {
   initialProfiles,
   initialChannels,
   initialMessages,
+  initialStatusReports,
   defaultAdminPermissions,
   defaultMemberPermissions,
 } from '../data/mockData';
@@ -43,6 +45,7 @@ interface AppContextType {
   profiles: Profile[];
   channels: ChatChannel[];
   messages: ChatMessage[];
+  statusReports: StatusReport[];
   
   // Active selection
   currentStartupId: string;
@@ -56,6 +59,7 @@ interface AppContextType {
   currentUser: Profile;
   login: (email: string, name?: string) => void;
   logout: () => void;
+  resetAdminPassword: (newPass: string) => void;
 
   // Startup Actions
   addStartup: (startup: Omit<Startup, 'id' | 'created_at'>) => string;
@@ -63,9 +67,20 @@ interface AppContextType {
   quickUpdateStatus: (id: string, status: StartupStatus) => void;
   updateStartupStage: (id: string, stage: StartupStage) => void;
   deleteStartup: (id: string) => void;
+  updateStartupSettings: (
+    id: string,
+    updates: {
+      name?: string;
+      description?: string;
+      logo_url?: string;
+      website_url?: string;
+      settings_access_user_ids?: string[];
+    }
+  ) => void;
 
   // Task Actions
   addTask: (task: Omit<Task, 'id' | 'created_at'>) => void;
+  updateTask: (id: string, updates: Partial<Task>) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
 
@@ -76,8 +91,15 @@ interface AppContextType {
 
   // Milestone Actions
   addMilestone: (milestone: Omit<RoadmapMilestone, 'id'>) => void;
+  updateMilestone: (id: string, updates: Partial<RoadmapMilestone>) => void;
   updateMilestoneStatus: (id: string, status: RoadmapMilestone['status']) => void;
+  toggleMilestoneCondition: (milestoneId: string, conditionId: string) => void;
+  addMilestoneCondition: (milestoneId: string, text: string) => void;
   deleteMilestone: (id: string) => void;
+
+  // Status Bulletin Reports (Post-it notes)
+  addStatusReport: (content: string, color?: StatusReport['color'], startupId?: string) => void;
+  deleteStatusReport: (id: string) => void;
 
   // Interaction Actions
   addInteraction: (interaction: Omit<CustomerInteraction, 'id' | 'created_at'>) => void;
@@ -124,52 +146,57 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [startups, setStartups] = useState<Startup[]>(() => {
-    const saved = localStorage.getItem('trackaa_startups_v2');
+    const saved = localStorage.getItem('trackaa_startups_v3');
     return saved ? JSON.parse(saved) : initialStartups;
   });
 
   const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem('trackaa_tasks_v2');
+    const saved = localStorage.getItem('trackaa_tasks_v3');
     return saved ? JSON.parse(saved) : initialTasks;
   });
 
   const [blockers, setBlockers] = useState<Blocker[]>(() => {
-    const saved = localStorage.getItem('trackaa_blockers_v2');
+    const saved = localStorage.getItem('trackaa_blockers_v3');
     return saved ? JSON.parse(saved) : initialBlockers;
   });
 
   const [milestones, setMilestones] = useState<RoadmapMilestone[]>(() => {
-    const saved = localStorage.getItem('trackaa_milestones_v2');
+    const saved = localStorage.getItem('trackaa_milestones_v3');
     return saved ? JSON.parse(saved) : initialMilestones;
   });
 
+  const [statusReports, setStatusReports] = useState<StatusReport[]>(() => {
+    const saved = localStorage.getItem('trackaa_status_reports_v3');
+    return saved ? JSON.parse(saved) : initialStatusReports;
+  });
+
   const [interactions, setInteractions] = useState<CustomerInteraction[]>(() => {
-    const saved = localStorage.getItem('trackaa_interactions_v2');
+    const saved = localStorage.getItem('trackaa_interactions_v3');
     return saved ? JSON.parse(saved) : initialInteractions;
   });
 
   const [assets, setAssets] = useState<StartupAsset[]>(() => {
-    const saved = localStorage.getItem('trackaa_assets_v2');
+    const saved = localStorage.getItem('trackaa_assets_v3');
     return saved ? JSON.parse(saved) : initialAssets;
   });
 
   const [finances, setFinances] = useState<StartupFinance[]>(() => {
-    const saved = localStorage.getItem('trackaa_finances_v2');
+    const saved = localStorage.getItem('trackaa_finances_v3');
     return saved ? JSON.parse(saved) : initialFinances;
   });
 
   const [profiles, setProfiles] = useState<Profile[]>(() => {
-    const saved = localStorage.getItem('trackaa_profiles_v2');
+    const saved = localStorage.getItem('trackaa_profiles_v3');
     return saved ? JSON.parse(saved) : initialProfiles;
   });
 
   const [channels, setChannels] = useState<ChatChannel[]>(() => {
-    const saved = localStorage.getItem('trackaa_channels_v2');
+    const saved = localStorage.getItem('trackaa_channels_v3');
     return saved ? JSON.parse(saved) : initialChannels;
   });
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    const saved = localStorage.getItem('trackaa_messages_v2');
+    const saved = localStorage.getItem('trackaa_messages_v3');
     return saved ? JSON.parse(saved) : initialMessages;
   });
 
@@ -204,27 +231,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Sync to local storage
   useEffect(() => {
-    localStorage.setItem('trackaa_startups_v2', JSON.stringify(startups));
+    localStorage.setItem('trackaa_startups_v3', JSON.stringify(startups));
   }, [startups]);
 
   useEffect(() => {
-    localStorage.setItem('trackaa_tasks_v2', JSON.stringify(tasks));
+    localStorage.setItem('trackaa_tasks_v3', JSON.stringify(tasks));
   }, [tasks]);
 
   useEffect(() => {
-    localStorage.setItem('trackaa_blockers_v2', JSON.stringify(blockers));
+    localStorage.setItem('trackaa_blockers_v3', JSON.stringify(blockers));
   }, [blockers]);
 
   useEffect(() => {
-    localStorage.setItem('trackaa_profiles_v2', JSON.stringify(profiles));
+    localStorage.setItem('trackaa_milestones_v3', JSON.stringify(milestones));
+  }, [milestones]);
+
+  useEffect(() => {
+    localStorage.setItem('trackaa_status_reports_v3', JSON.stringify(statusReports));
+  }, [statusReports]);
+
+  useEffect(() => {
+    localStorage.setItem('trackaa_profiles_v3', JSON.stringify(profiles));
   }, [profiles]);
 
   useEffect(() => {
-    localStorage.setItem('trackaa_channels_v2', JSON.stringify(channels));
+    localStorage.setItem('trackaa_channels_v3', JSON.stringify(channels));
   }, [channels]);
 
   useEffect(() => {
-    localStorage.setItem('trackaa_messages_v2', JSON.stringify(messages));
+    localStorage.setItem('trackaa_messages_v3', JSON.stringify(messages));
   }, [messages]);
 
   const toggleTheme = () => {
@@ -248,20 +283,60 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.removeItem('trackaa_auth');
   };
 
+  const resetAdminPassword = (newPass: string) => {
+    setCurrentUser(prev => ({
+      ...prev,
+      temporary_password: newPass,
+    }));
+    setProfiles(prev =>
+      prev.map(p => (p.id === currentUser.id ? { ...p, temporary_password: newPass } : p))
+    );
+  };
+
   // Startup actions
   const addStartup = (data: Omit<Startup, 'id' | 'created_at'>): string => {
     const id = `startup-${Date.now()}`;
     const newStartup: Startup = {
       ...data,
       id,
+      settings_access_user_ids: [currentUser.id],
       created_at: new Date().toISOString(),
     };
+
+    // Auto-create isolated Common Room for this startup
+    const defaultCommonRoom: ChatChannel = {
+      id: `common-room-${id}`,
+      startup_id: id,
+      name: `Common Room (${data.name})`,
+      description: `The general town hall for ${data.name} members.`,
+      is_common_room: true,
+      is_subgroup: false,
+      created_by: currentUser.id,
+      member_ids: profiles.map(p => p.id),
+    };
+
     setStartups(prev => [newStartup, ...prev]);
+    setChannels(prev => [...prev, defaultCommonRoom]);
     setCurrentStartupId(id);
     return id;
   };
 
   const updateStartup = (id: string, updates: Partial<Startup>) => {
+    setStartups(prev =>
+      prev.map(s => (s.id === id ? { ...s, ...updates, updated_at: new Date().toISOString() } : s))
+    );
+  };
+
+  const updateStartupSettings = (
+    id: string,
+    updates: {
+      name?: string;
+      description?: string;
+      logo_url?: string;
+      website_url?: string;
+      settings_access_user_ids?: string[];
+    }
+  ) => {
     setStartups(prev =>
       prev.map(s => (s.id === id ? { ...s, ...updates, updated_at: new Date().toISOString() } : s))
     );
@@ -297,6 +372,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       created_at: new Date().toISOString(),
     };
     setTasks(prev => [newTask, ...prev]);
+  };
+
+  const updateTask = (id: string, updates: Partial<Task>) => {
+    setTasks(prev => prev.map(t => (t.id === id ? { ...t, ...updates } : t)));
   };
 
   const toggleTask = (id: string) => {
@@ -347,14 +426,89 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setMilestones(prev => [...prev, newMilestone]);
   };
 
+  const updateMilestone = (id: string, updates: Partial<RoadmapMilestone>) => {
+    setMilestones(prev => prev.map(m => (m.id === id ? { ...m, ...updates } : m)));
+  };
+
   const updateMilestoneStatus = (id: string, status: RoadmapMilestone['status']) => {
+    const isAchieved = status === 'achieved';
     setMilestones(prev =>
-      prev.map(m => (m.id === id ? { ...m, status } : m))
+      prev.map(m =>
+        m.id === id
+          ? {
+              ...m,
+              status,
+              completed_date: isAchieved ? new Date().toISOString().split('T')[0] : undefined,
+            }
+          : m
+      )
+    );
+  };
+
+  const toggleMilestoneCondition = (milestoneId: string, conditionId: string) => {
+    setMilestones(prev =>
+      prev.map(m => {
+        if (m.id !== milestoneId || !m.conditions) return m;
+        const updatedConditions = m.conditions.map(c =>
+          c.id === conditionId ? { ...c, completed: !c.completed } : c
+        );
+        const allCompleted = updatedConditions.every(c => c.completed);
+        return {
+          ...m,
+          conditions: updatedConditions,
+          status: allCompleted ? 'achieved' : m.status === 'achieved' ? 'in_progress' : m.status,
+          completed_date: allCompleted ? new Date().toISOString().split('T')[0] : undefined,
+        };
+      })
+    );
+  };
+
+  const addMilestoneCondition = (milestoneId: string, text: string) => {
+    if (!text.trim()) return;
+    const newCondition = {
+      id: `c-${Date.now()}`,
+      text: text.trim(),
+      completed: false,
+    };
+    setMilestones(prev =>
+      prev.map(m => {
+        if (m.id !== milestoneId) return m;
+        return {
+          ...m,
+          conditions: [...(m.conditions || []), newCondition],
+        };
+      })
     );
   };
 
   const deleteMilestone = (id: string) => {
     setMilestones(prev => prev.filter(m => m.id !== id));
+  };
+
+  // Status Bulletin Reports (Post-it notes)
+  const addStatusReport = (
+    content: string,
+    color: StatusReport['color'] = 'amber',
+    startupId?: string
+  ) => {
+    if (!content.trim()) return;
+    const now = new Date();
+    const timeStr = `Today at ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    const newReport: StatusReport = {
+      id: `rep-${Date.now()}`,
+      startup_id: startupId || currentStartupId,
+      content: content.trim(),
+      author_id: currentUser.id,
+      author_name: currentUser.full_name,
+      author_avatar: currentUser.avatar_url,
+      created_at: timeStr,
+      color,
+    };
+    setStatusReports(prev => [newReport, ...prev]);
+  };
+
+  const deleteStatusReport = (id: string) => {
+    setStatusReports(prev => prev.filter(r => r.id !== id));
   };
 
   // Interaction actions
@@ -518,6 +672,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTasks(initialTasks);
     setBlockers(initialBlockers);
     setMilestones(initialMilestones);
+    setStatusReports(initialStatusReports);
     setInteractions(initialInteractions);
     setAssets(initialAssets);
     setFinances(initialFinances);
@@ -542,6 +697,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         profiles,
         channels,
         messages,
+        statusReports,
         currentStartupId,
         setCurrentStartupId,
         currentStartup,
@@ -551,20 +707,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         currentUser,
         login,
         logout,
+        resetAdminPassword,
         addStartup,
         updateStartup,
+        updateStartupSettings,
         quickUpdateStatus,
         updateStartupStage,
         deleteStartup,
         addTask,
+        updateTask,
         toggleTask,
         deleteTask,
         addBlocker,
         resolveBlocker,
         deleteBlocker,
         addMilestone,
+        updateMilestone,
         updateMilestoneStatus,
+        toggleMilestoneCondition,
+        addMilestoneCondition,
         deleteMilestone,
+        addStatusReport,
+        deleteStatusReport,
         addInteraction,
         deleteInteraction,
         addAsset,
