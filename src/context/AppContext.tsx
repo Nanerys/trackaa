@@ -9,6 +9,12 @@ import {
   StartupFinance,
   Profile,
   StartupStatus,
+  StartupStage,
+  StatusLadderRung,
+  ChatChannel,
+  ChatMessage,
+  UserPermissions,
+  ActiveStatus,
 } from '../types';
 import {
   initialStartups,
@@ -19,6 +25,10 @@ import {
   initialAssets,
   initialFinances,
   initialProfiles,
+  initialChannels,
+  initialMessages,
+  defaultAdminPermissions,
+  defaultMemberPermissions,
 } from '../data/mockData';
 
 interface AppContextType {
@@ -31,6 +41,8 @@ interface AppContextType {
   assets: StartupAsset[];
   finances: StartupFinance[];
   profiles: Profile[];
+  channels: ChatChannel[];
+  messages: ChatMessage[];
   
   // Active selection
   currentStartupId: string;
@@ -49,6 +61,7 @@ interface AppContextType {
   addStartup: (startup: Omit<Startup, 'id' | 'created_at'>) => string;
   updateStartup: (id: string, updates: Partial<Startup>) => void;
   quickUpdateStatus: (id: string, status: StartupStatus) => void;
+  updateStartupStage: (id: string, stage: StartupStage) => void;
   deleteStartup: (id: string) => void;
 
   // Task Actions
@@ -78,6 +91,22 @@ interface AppContextType {
   addFinance: (finance: Omit<StartupFinance, 'id' | 'created_at'>) => void;
   deleteFinance: (id: string) => void;
 
+  // Comms Actions
+  sendMessage: (msg: Omit<ChatMessage, 'id' | 'timestamp'>) => void;
+  createSubgroup: (name: string, description: string) => ChatChannel;
+  toggleUserActiveStatus: (status: ActiveStatus) => void;
+  clearUnreadForUser: (userId: string) => void;
+
+  // Team & RBAC
+  inviteMember: (data: {
+    email: string;
+    full_name: string;
+    role: string;
+    department?: string;
+    temporary_password?: string;
+    permissions: UserPermissions;
+  }) => Profile;
+
   // Financial Metrics
   getTotalCapitalIn: (projectId: string) => number;
   getTotalExpenses: (projectId: string) => number;
@@ -94,43 +123,55 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize state from localStorage or fallback
   const [startups, setStartups] = useState<Startup[]>(() => {
-    const saved = localStorage.getItem('trackaa_startups');
+    const saved = localStorage.getItem('trackaa_startups_v2');
     return saved ? JSON.parse(saved) : initialStartups;
   });
 
   const [tasks, setTasks] = useState<Task[]>(() => {
-    const saved = localStorage.getItem('trackaa_tasks');
+    const saved = localStorage.getItem('trackaa_tasks_v2');
     return saved ? JSON.parse(saved) : initialTasks;
   });
 
   const [blockers, setBlockers] = useState<Blocker[]>(() => {
-    const saved = localStorage.getItem('trackaa_blockers');
+    const saved = localStorage.getItem('trackaa_blockers_v2');
     return saved ? JSON.parse(saved) : initialBlockers;
   });
 
   const [milestones, setMilestones] = useState<RoadmapMilestone[]>(() => {
-    const saved = localStorage.getItem('trackaa_milestones');
+    const saved = localStorage.getItem('trackaa_milestones_v2');
     return saved ? JSON.parse(saved) : initialMilestones;
   });
 
   const [interactions, setInteractions] = useState<CustomerInteraction[]>(() => {
-    const saved = localStorage.getItem('trackaa_interactions');
+    const saved = localStorage.getItem('trackaa_interactions_v2');
     return saved ? JSON.parse(saved) : initialInteractions;
   });
 
   const [assets, setAssets] = useState<StartupAsset[]>(() => {
-    const saved = localStorage.getItem('trackaa_assets');
+    const saved = localStorage.getItem('trackaa_assets_v2');
     return saved ? JSON.parse(saved) : initialAssets;
   });
 
   const [finances, setFinances] = useState<StartupFinance[]>(() => {
-    const saved = localStorage.getItem('trackaa_finances');
+    const saved = localStorage.getItem('trackaa_finances_v2');
     return saved ? JSON.parse(saved) : initialFinances;
   });
 
-  const [profiles] = useState<Profile[]>(initialProfiles);
+  const [profiles, setProfiles] = useState<Profile[]>(() => {
+    const saved = localStorage.getItem('trackaa_profiles_v2');
+    return saved ? JSON.parse(saved) : initialProfiles;
+  });
+
+  const [channels, setChannels] = useState<ChatChannel[]>(() => {
+    const saved = localStorage.getItem('trackaa_channels_v2');
+    return saved ? JSON.parse(saved) : initialChannels;
+  });
+
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const saved = localStorage.getItem('trackaa_messages_v2');
+    return saved ? JSON.parse(saved) : initialMessages;
+  });
 
   const [currentStartupId, setCurrentStartupId] = useState<string>(() => {
     return initialStartups[0]?.id || '';
@@ -149,7 +190,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return (saved as 'dark' | 'light') || 'dark';
   });
 
-  // Keep HTML root class aligned with theme
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'dark') {
@@ -162,34 +202,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('trackaa_theme', theme);
   }, [theme]);
 
-  // Persist state changes
+  // Sync to local storage
   useEffect(() => {
-    localStorage.setItem('trackaa_startups', JSON.stringify(startups));
+    localStorage.setItem('trackaa_startups_v2', JSON.stringify(startups));
   }, [startups]);
 
   useEffect(() => {
-    localStorage.setItem('trackaa_tasks', JSON.stringify(tasks));
+    localStorage.setItem('trackaa_tasks_v2', JSON.stringify(tasks));
   }, [tasks]);
 
   useEffect(() => {
-    localStorage.setItem('trackaa_blockers', JSON.stringify(blockers));
+    localStorage.setItem('trackaa_blockers_v2', JSON.stringify(blockers));
   }, [blockers]);
 
   useEffect(() => {
-    localStorage.setItem('trackaa_milestones', JSON.stringify(milestones));
-  }, [milestones]);
+    localStorage.setItem('trackaa_profiles_v2', JSON.stringify(profiles));
+  }, [profiles]);
 
   useEffect(() => {
-    localStorage.setItem('trackaa_interactions', JSON.stringify(interactions));
-  }, [interactions]);
+    localStorage.setItem('trackaa_channels_v2', JSON.stringify(channels));
+  }, [channels]);
 
   useEffect(() => {
-    localStorage.setItem('trackaa_assets', JSON.stringify(assets));
-  }, [assets]);
-
-  useEffect(() => {
-    localStorage.setItem('trackaa_finances', JSON.stringify(finances));
-  }, [finances]);
+    localStorage.setItem('trackaa_messages_v2', JSON.stringify(messages));
+  }, [messages]);
 
   const toggleTheme = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
@@ -234,6 +270,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const quickUpdateStatus = (id: string, status: StartupStatus) => {
     setStartups(prev =>
       prev.map(s => (s.id === id ? { ...s, status, updated_at: new Date().toISOString() } : s))
+    );
+  };
+
+  const updateStartupStage = (id: string, stage: StartupStage) => {
+    setStartups(prev =>
+      prev.map(s => (s.id === id ? { ...s, stage, updated_at: new Date().toISOString() } : s))
     );
   };
 
@@ -357,6 +399,74 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setFinances(prev => prev.filter(f => f.id !== id));
   };
 
+  // Comms actions
+  const sendMessage = (msg: Omit<ChatMessage, 'id' | 'timestamp'>) => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMsg: ChatMessage = {
+      ...msg,
+      id: `msg-${Date.now()}`,
+      timestamp: timeStr,
+    };
+    setMessages(prev => [...prev, newMsg]);
+  };
+
+  const createSubgroup = (name: string, description: string): ChatChannel => {
+    const newChan: ChatChannel = {
+      id: `sub-${Date.now()}`,
+      startup_id: currentStartupId,
+      name: name.startsWith('#') ? name.slice(1) : name,
+      description,
+      is_common_room: false,
+      is_subgroup: true,
+      created_by: currentUser.id,
+      member_ids: profiles.map(p => p.id),
+    };
+    setChannels(prev => [...prev, newChan]);
+    return newChan;
+  };
+
+  const toggleUserActiveStatus = (status: ActiveStatus) => {
+    setCurrentUser(prev => ({ ...prev, active_status: status }));
+    setProfiles(prev =>
+      prev.map(p => (p.id === currentUser.id ? { ...p, active_status: status } : p))
+    );
+  };
+
+  const clearUnreadForUser = (userId: string) => {
+    setProfiles(prev =>
+      prev.map(p => (p.id === userId ? { ...p, unread_count: 0 } : p))
+    );
+  };
+
+  // Team & RBAC
+  const inviteMember = (data: {
+    email: string;
+    full_name: string;
+    role: string;
+    department?: string;
+    temporary_password?: string;
+    permissions: UserPermissions;
+  }): Profile => {
+    const hierarchy = `${data.full_name} > Trackaa > ${data.role} > ${data.department || 'Operations'}`;
+    const newMember: Profile = {
+      id: `p-${Date.now()}`,
+      full_name: data.full_name,
+      email: data.email,
+      role: data.role,
+      department: data.department || 'Team',
+      hierarchy_path: hierarchy,
+      avatar_url: `https://images.unsplash.com/photo-${1534528741775 + Math.floor(Math.random() * 1000)}?auto=format&fit=crop&w=256&q=80`,
+      active_status: 'online',
+      unread_count: 0,
+      is_admin: false,
+      permissions: data.permissions,
+      temporary_password: data.temporary_password || Math.random().toString(36).slice(-8),
+    };
+    setProfiles(prev => [...prev, newMember]);
+    return newMember;
+  };
+
   // Financial calculations
   const getTotalCapitalIn = (projectId: string): number => {
     return finances
@@ -380,20 +490,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
     if (expenses.length === 0) return 0;
     const totalExp = expenses.reduce((sum, f) => sum + f.amount, 0);
-    // Simple average monthly estimation
     return Math.round(totalExp / 2);
   };
 
   const getEstimatedRunwayMonths = (projectId: string): number => {
     const netCash = getNetCash(projectId);
     const burn = getMonthlyBurnRate(projectId);
-    if (burn <= 0) return 24; // Healthy baseline
+    if (burn <= 0) return 24;
     if (netCash <= 0) return 0;
     const months = netCash / burn;
     return Math.min(Math.round(months * 10) / 10, 48);
   };
 
-  // Computed metrics
   const getStartupProgress = (projectId: string): number => {
     const startupTasks = tasks.filter(t => t.project_id === projectId);
     if (startupTasks.length === 0) return 0;
@@ -413,6 +521,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setInteractions(initialInteractions);
     setAssets(initialAssets);
     setFinances(initialFinances);
+    setProfiles(initialProfiles);
+    setChannels(initialChannels);
+    setMessages(initialMessages);
     localStorage.clear();
   };
 
@@ -429,6 +540,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         assets,
         finances,
         profiles,
+        channels,
+        messages,
         currentStartupId,
         setCurrentStartupId,
         currentStartup,
@@ -441,6 +554,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addStartup,
         updateStartup,
         quickUpdateStatus,
+        updateStartupStage,
         deleteStartup,
         addTask,
         toggleTask,
@@ -457,6 +571,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteAsset,
         addFinance,
         deleteFinance,
+        sendMessage,
+        createSubgroup,
+        toggleUserActiveStatus,
+        clearUnreadForUser,
+        inviteMember,
         getTotalCapitalIn,
         getTotalExpenses,
         getNetCash,

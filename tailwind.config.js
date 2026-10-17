@@ -9,13 +9,27 @@ export default {
     extend: {
       colors: {
         trackaa: {
-          green: '#00C389',
+          // Darkened, rich emerald & forest greens
+          green: '#047857', // Rich deep emerald
+          'green-dark': '#065F46',
+          'green-accent': '#059669',
           'green-light': '#10B981',
-          'green-glow': '#34D399',
-          navy: '#0A111E',
-          'navy-surface': '#0F1A2E',
-          'navy-card': '#13213A',
-          'navy-border': 'rgba(255, 255, 255, 0.08)',
+          'green-glow': 'rgba(5, 150, 105, 0.4)',
+          
+          // Rich deep navy blue
+          navy: '#0F1E36',
+          'navy-deep': '#0B1526',
+          'navy-surface': '#15243E',
+          'navy-card': '#192C4D',
+          'navy-accent': '#1E3A8A',
+          
+          // Backgrounds
+          'dark-bg': '#111827', // Lightened dark mode background (elevated titanium slate)
+          'dark-surface': '#162032',
+          'dark-card': '#1E293B',
+          
+          'light-bg': '#F8FAFC',
+          'light-grain': '#F1F5F9',
         },
       },
       fontFamily: {
@@ -34,8 +48,9 @@ export default {
         'glass-sm': '0 2px 10px 0 rgba(0, 0, 0, 0.05)',
         'glass-md': '0 8px 30px 0 rgba(0, 0, 0, 0.08)',
         'glass-lg': '0 20px 50px 0 rgba(0, 0, 0, 0.15)',
-        'glow-emerald': '0 0 25px -4px rgba(0, 195, 137, 0.35)',
-        'glow-subtle': '0 0 40px -10px rgba(0, 195, 137, 0.15)',
+        'glow-emerald': '0 0 25px -4px rgba(5, 150, 105, 0.45)',
+        'glow-navy': '0 0 30px -5px rgba(30, 58, 138, 0.35)',
+        'glow-subtle': '0 0 40px -10px rgba(5, 150, 105, 0.2)',
       },
       borderRadius: {
         'apple-sm': '10px',

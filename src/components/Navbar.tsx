@@ -8,10 +8,9 @@ import {
   Moon,
   ChevronDown,
   Layers,
-  Users,
+  MessageSquare,
   Settings as SettingsIcon,
   LogOut,
-  ExternalLink,
   Sparkles,
 } from 'lucide-react';
 
@@ -29,6 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenNewStartup }) => {
     toggleTheme,
     isAuthenticated,
     currentUser,
+    profiles,
     logout,
   } = useApp();
 
@@ -39,6 +39,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenNewStartup }) => {
 
   const switcherRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Total unread messages across all team members
+  const totalUnread = profiles.reduce((sum, p) => sum + (p.unread_count || 0), 0);
 
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
@@ -61,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenNewStartup }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-2xl bg-white/70 dark:bg-[#0A111E]/80 border-b border-black/[0.06] dark:border-white/[0.08] transition-colors duration-200">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-2xl bg-white/75 dark:bg-[#111827]/85 border-b border-black/[0.06] dark:border-white/[0.08] transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Left: Brand & Venture Switcher */}
         <div className="flex items-center gap-5">
@@ -83,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenNewStartup }) => {
                     className="w-4 h-4 rounded-full object-cover"
                   />
                 ) : (
-                  <span className="w-4 h-4 rounded-full bg-trackaa-green/20 text-trackaa-green flex items-center justify-center font-bold text-[9px]">
+                  <span className="w-4 h-4 rounded-full bg-trackaa-green text-white flex items-center justify-center font-bold text-[9px]">
                     {currentStartup?.name.charAt(0)}
                   </span>
                 )}
@@ -111,7 +114,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenNewStartup }) => {
                           }}
                           className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all ${
                             isActive
-                              ? 'bg-trackaa-green/10 text-trackaa-green font-semibold'
+                              ? 'bg-trackaa-green text-white font-semibold shadow-sm'
                               : 'text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/5'
                           }`}
                         >
@@ -124,9 +127,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenNewStartup }) => {
                           )}
                           <div className="flex-1 min-w-0">
                             <div className="truncate">{s.name}</div>
-                            <div className="text-[10px] text-slate-400 dark:text-slate-500 capitalize">{s.stage}</div>
+                            <div className={`text-[10px] capitalize ${isActive ? 'text-white/80' : 'text-slate-400'}`}>
+                              {s.stage.replace('_', ' ')}
+                            </div>
                           </div>
-                          {isActive && <div className="w-1.5 h-1.5 rounded-full bg-trackaa-green" />}
+                          {isActive && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </button>
                       );
                     })}
@@ -157,7 +162,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenNewStartup }) => {
               to="/dashboard"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                 isCurrent('/dashboard')
-                  ? 'bg-black/5 dark:bg-white/10 text-slate-900 dark:text-white shadow-sm'
+                  ? 'bg-trackaa-green text-white font-semibold shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -165,23 +170,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenNewStartup }) => {
               <span>Startups</span>
             </Link>
 
+            {/* Changed from Teams to Comms with unread notification badge */}
             <Link
-              to="/team"
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                isCurrent('/team')
-                  ? 'bg-black/5 dark:bg-white/10 text-slate-900 dark:text-white shadow-sm'
+              to="/comms"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all relative ${
+                isCurrent('/comms')
+                  ? 'bg-trackaa-green text-white font-semibold shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Users className="w-3.5 h-3.5" />
-              <span>Team</span>
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>Comms</span>
+              {totalUnread > 0 && (
+                <span className="w-4 h-4 rounded-full bg-rose-600 text-white font-extrabold text-[9px] flex items-center justify-center">
+                  {totalUnread}
+                </span>
+              )}
             </Link>
 
             <Link
               to="/settings"
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                 isCurrent('/settings')
-                  ? 'bg-black/5 dark:bg-white/10 text-slate-900 dark:text-white shadow-sm'
+                  ? 'bg-trackaa-green text-white font-semibold shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -192,8 +203,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenNewStartup }) => {
         ) : (
           <div className="hidden md:flex items-center gap-6 text-xs font-medium text-slate-600 dark:text-slate-300">
             <a href="#features" className="hover:text-trackaa-green transition-colors">Features</a>
+            <a href="#pricing" className="hover:text-trackaa-green transition-colors">Founder Pricing</a>
             <a href="#vault" className="hover:text-trackaa-green transition-colors">Asset Vault</a>
-            <a href="#finances" className="hover:text-trackaa-green transition-colors">Runway Ledger</a>
             <a href="#testimonials" className="hover:text-trackaa-green transition-colors">Testimonials</a>
           </div>
         )}
@@ -221,7 +232,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenNewStartup }) => {
                 <button
                   type="button"
                   onClick={onOpenNewStartup}
-                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-trackaa-green text-slate-950 font-semibold text-xs hover:bg-[#00DDA0] transition-all shadow-glow-emerald active:scale-95"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-trackaa-green text-white font-semibold text-xs hover:bg-[#059669] transition-all shadow-glow-emerald active:scale-95"
                 >
                   <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>New Startup</span>
@@ -286,7 +297,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenNewStartup }) => {
               </Link>
               <Link
                 to="/auth?mode=signup"
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-trackaa-green text-slate-950 font-semibold text-xs hover:bg-[#00DDA0] transition-all shadow-glow-emerald active:scale-95"
+                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-trackaa-green text-white font-semibold text-xs hover:bg-[#059669] transition-all shadow-glow-emerald active:scale-95"
               >
                 <span>Get Started Free</span>
               </Link>

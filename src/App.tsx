@@ -5,7 +5,7 @@ import { Navbar } from './components/Navbar';
 import { LandingPage } from './pages/LandingPage';
 import { Dashboard } from './pages/Dashboard';
 import { StartupDetail } from './pages/StartupDetail';
-import { TeamMembers } from './pages/TeamMembers';
+import { Comms } from './pages/Comms';
 import { Settings } from './pages/Settings';
 import { Auth } from './pages/Auth';
 import { NewStartupModal } from './components/NewStartupModal';
@@ -19,7 +19,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthPage = location.pathname === '/auth';
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0A111E] text-slate-900 dark:text-slate-100 transition-colors duration-200 flex flex-col">
+    <div className="min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-200 flex flex-col">
       {!isLandingPage && !isAuthPage && (
         <Navbar onOpenNewStartup={() => setIsNewStartupOpen(true)} />
       )}
@@ -42,7 +42,9 @@ export const AppContent: React.FC = () => {
         <Route path="/auth" element={<Auth />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/startups/:id" element={<StartupDetail />} />
-        <Route path="/team" element={<TeamMembers />} />
+        <Route path="/comms" element={<Comms />} />
+        {/* Backward compatibility for team route */}
+        <Route path="/team" element={<Navigate to="/comms" replace />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

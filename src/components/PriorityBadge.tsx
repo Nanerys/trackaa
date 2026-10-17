@@ -6,30 +6,26 @@ interface PriorityBadgeProps {
   size?: 'sm' | 'md';
 }
 
-const priorityConfig: Record<PriorityLevel, { label: string; text: string; bg: string; border: string }> = {
+const priorityConfig: Record<PriorityLevel, { label: string; bgClass: string; borderClass: string }> = {
   low: {
     label: 'Low',
-    text: 'text-slate-600 dark:text-slate-400',
-    bg: 'bg-slate-500/10',
-    border: 'border-slate-500/20',
+    bgClass: 'bg-slate-700 dark:bg-slate-800',
+    borderClass: 'border-slate-500/30',
   },
   medium: {
     label: 'Medium',
-    text: 'text-amber-600 dark:text-amber-400',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/20',
+    bgClass: 'bg-amber-600 dark:bg-amber-700',
+    borderClass: 'border-amber-400/30',
   },
   high: {
     label: 'High',
-    text: 'text-orange-600 dark:text-orange-400',
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500/20',
+    bgClass: 'bg-orange-600 dark:bg-orange-700',
+    borderClass: 'border-orange-400/30',
   },
   critical: {
     label: 'Critical',
-    text: 'text-rose-600 dark:text-rose-400 font-semibold',
-    bg: 'bg-rose-500/15',
-    border: 'border-rose-500/30',
+    bgClass: 'bg-rose-700 dark:bg-rose-800',
+    borderClass: 'border-rose-400/40',
   },
 };
 
@@ -37,7 +33,9 @@ export const PriorityBadge: React.FC<PriorityBadgeProps> = ({ priority, size = '
   const config = priorityConfig[priority] || priorityConfig.medium;
   return (
     <span
-      className={`inline-flex items-center rounded-full border uppercase tracking-wider font-medium ${config.bg} ${config.text} ${config.border} ${
+      className={`inline-flex items-center rounded-full border uppercase tracking-wider font-semibold text-white shadow-sm ${
+        config.bgClass
+      } ${config.borderClass} ${
         size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'
       }`}
     >
