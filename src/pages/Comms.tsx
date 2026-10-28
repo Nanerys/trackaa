@@ -24,6 +24,12 @@ import {
   UserPlus,
   Briefcase,
 } from 'lucide-react';
+import {
+  AbstractHeaderFlourish,
+  IsometricCube,
+  StripedTube,
+  MemphisStickerBadge,
+} from '../components/AbstractArt';
 
 export const Comms: React.FC = () => {
   const {
@@ -175,10 +181,18 @@ export const Comms: React.FC = () => {
       {/* Top Banner with Venture Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-black/5 dark:border-white/10 gap-3">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Comms Hub
-            </h1>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Comms Hub
+              </h1>
+              <div className="hidden sm:block">
+                <AbstractHeaderFlourish />
+              </div>
+              <div className="hidden md:block">
+                <MemphisStickerBadge text="Zero Noise" color="green" className="-rotate-2" />
+              </div>
+            </div>
 
             {/* Per-Startup Active Switcher */}
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-2xl bg-trackaa-green/10 border border-trackaa-green/30">
@@ -484,16 +498,24 @@ export const Comms: React.FC = () => {
           {/* Messages Stream */}
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
             {currentMessages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-center p-8">
-                <div className="w-12 h-12 rounded-2xl bg-trackaa-green/10 text-trackaa-green flex items-center justify-center mb-3">
-                  <MessageSquare className="w-6 h-6" />
+              <div className="h-full flex flex-col items-center justify-center text-center p-8 relative overflow-hidden">
+                <div className="relative mb-4 flex items-center justify-center">
+                  <div className="animate-float">
+                    <IsometricCube size={56} />
+                  </div>
+                  <div className="absolute -bottom-2 -right-4 animate-float-delayed">
+                    <StripedTube size={36} />
+                  </div>
                 </div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
                   No messages in this thread yet
                 </h3>
-                <p className="text-xs text-slate-400 max-w-xs mt-1">
+                <p className="text-xs text-slate-500 max-w-sm mt-1">
                   Tag tasks, blockers, receipts, or legal SAFE docs to align your team without meeting fatigue.
                 </p>
+                <div className="mt-3">
+                  <MemphisStickerBadge text="Instant Founder Alignment" color="orange" className="rotate-1" />
+                </div>
               </div>
             ) : (
               currentMessages.map(msg => {

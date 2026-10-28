@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import {
+  AbstractHeaderFlourish,
+  IsometricCube,
+  IsometricStairs,
+  MemphisStickerBadge,
+} from './AbstractArt';
+import {
   X,
   ChevronLeft,
   ChevronRight,
@@ -212,6 +218,9 @@ export const InteractiveTourModal: React.FC<InteractiveTourModalProps> = ({ isOp
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-trackaa-green text-white">
                   Live Clickable Walkthrough
                 </span>
+                <div className="hidden sm:block ml-1">
+                  <AbstractHeaderFlourish />
+                </div>
               </div>
               <p className="text-[11px] text-slate-500">
                 Explore every workflow inside your startup operating system

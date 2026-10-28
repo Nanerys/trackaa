@@ -16,6 +16,11 @@ import { StartupSettingsModal } from '../components/StartupSettingsModal';
 import { AddStatusReportModal } from '../components/AddStatusReportModal';
 import { AssetCategory, Task, RoadmapMilestone, StatusReport } from '../types';
 import {
+  AbstractHeaderFlourish,
+  IsometricCube,
+  MemphisStickerBadge,
+} from '../components/AbstractArt';
+import {
   ArrowLeft,
   CheckCircle2,
   AlertOctagon,
@@ -281,6 +286,9 @@ export const StartupDetail: React.FC = () => {
                 <StageBadge startupId={startup.id} stage={startup.stage} size="md" />
                 {/* 3. Priority Badge with White text */}
                 <PriorityBadge priority={startup.priority} size="md" />
+                <div className="hidden sm:block ml-1">
+                  <AbstractHeaderFlourish />
+                </div>
               </div>
 
               {/* Sub-meta: target launch date & website */}
@@ -582,9 +590,12 @@ export const StartupDetail: React.FC = () => {
                     <StickyNote className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                      Latest Status Bulletin
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                        Latest Status Bulletin
+                      </h3>
+                      <MemphisStickerBadge icon="📌" text="Live Corkboard" color="orange" />
+                    </div>
                     <p className="text-[11px] text-slate-400">
                       Tacked memos, standup headlines, and immediate updates
                     </p>

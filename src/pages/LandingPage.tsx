@@ -4,6 +4,15 @@ import { useApp } from '../context/AppContext';
 import { TrackaaLogo } from '../components/TrackaaLogo';
 import { InteractiveTourModal } from '../components/InteractiveTourModal';
 import {
+  HeroAbstractPiece,
+  IsometricCube,
+  IsometricStairs,
+  StripedTube,
+  PopBlob,
+  AbstractHeaderFlourish,
+  MemphisStickerBadge,
+} from '../components/AbstractArt';
+import {
   ArrowRight,
   CheckCircle2,
   TrendingUp,
@@ -79,7 +88,7 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* Floating Glass Navbar */}
-      <nav className="sticky top-0 z-40 backdrop-blur-2xl bg-white/80 dark:bg-[#0A111E]/85 border-b border-black/[0.06] dark:border-white/[0.08] transition-colors">
+      <nav className="sticky top-0 z-40 backdrop-blur-2xl bg-white/85 dark:bg-[#0A111E]/85 border-b border-black/[0.06] dark:border-white/[0.08] transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center">
             <TrackaaLogo size="sm" />
@@ -134,34 +143,37 @@ export const LandingPage: React.FC = () => {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="relative z-10 pt-14 pb-16 sm:pt-20 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+      {/* Hero Section with Abstract Pop Art Aesthetics */}
+      <section className="relative z-10 pt-12 pb-16 sm:pt-16 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+        {/* Floating Abstract 3D Geometric Accents */}
+        <div className="hidden lg:block absolute top-8 left-6 animate-float pointer-events-none select-none z-20">
+          <IsometricCube size={52} />
+        </div>
+
+        <div className="hidden lg:block absolute top-20 right-8 animate-float-delayed pointer-events-none select-none z-20">
+          <IsometricStairs size={58} />
+        </div>
+
+        <div className="hidden xl:block absolute top-96 left-10 animate-float-delayed pointer-events-none select-none z-20">
+          <StripedTube size={48} />
+        </div>
+
+        <div className="hidden xl:block absolute top-96 right-10 animate-float pointer-events-none select-none z-20">
+          <PopBlob size={44} />
+        </div>
+
         {/* Playful Floating Gen-Z Stickers */}
-        <div className="hidden lg:block absolute top-12 left-8 animate-float pointer-events-none select-none">
-          <div className="px-3 py-1.5 rounded-2xl glass-pill shadow-lg border border-black/10 dark:border-white/15 text-xs font-bold text-slate-800 dark:text-white flex items-center gap-2">
+        <div className="hidden lg:block absolute top-12 left-24 animate-float pointer-events-none select-none">
+          <div className="px-3.5 py-1.5 rounded-2xl glass-pill shadow-lg border border-black/10 dark:border-white/15 text-xs font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <span>🌯</span>
-            <span>Powered by Shawarma & 2 AM code</span>
+            <span>Shawarma & 2 AM code</span>
           </div>
         </div>
 
-        <div className="hidden lg:block absolute top-24 right-8 animate-float-delayed pointer-events-none select-none">
+        <div className="hidden lg:block absolute top-28 right-24 animate-float-delayed pointer-events-none select-none">
           <div className="px-3.5 py-1.5 rounded-2xl glass-pill shadow-lg border border-black/10 dark:border-white/15 text-xs font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <span>🚀</span>
-            <span>Next Target: First $10k MRR</span>
-          </div>
-        </div>
-
-        <div className="hidden xl:block absolute bottom-12 left-12 animate-float-delayed pointer-events-none select-none">
-          <div className="px-3.5 py-1.5 rounded-2xl glass-pill shadow-lg border border-black/10 dark:border-white/15 text-xs font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <span>📈</span>
-            <span>Runway: 18.4 Months Safe</span>
-          </div>
-        </div>
-
-        <div className="hidden xl:block absolute bottom-16 right-16 animate-float pointer-events-none select-none">
-          <div className="px-3.5 py-1.5 rounded-2xl glass-pill shadow-lg border border-black/10 dark:border-white/15 text-xs font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <span>💅</span>
-            <span>Zero enterprise bloat. Just speed.</span>
+            <span>Target: First $10k MRR</span>
           </div>
         </div>
 
@@ -170,7 +182,7 @@ export const LandingPage: React.FC = () => {
           <span className="w-2 h-2 rounded-full bg-trackaa-green animate-pulse" />
           <span>Trackaa OS 2.0</span>
           <span className="opacity-40">•</span>
-          <span>The Calm Workspace for First-Time Founders</span>
+          <span>The Calm Operating System for First-Time Founders</span>
         </div>
 
         {/* Headline */}
@@ -183,7 +195,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Subtitle */}
         <p className="mt-5 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
-          No more 14 open tabs, buried pitch deck drafts, or messy Slack threads. Trackaa brings your tasks, blocker audits, investor vault, and real cash runway into one calm home.
+          No more 14 open tabs, buried pitch deck drafts, or messy Slack threads. Trackaa brings your daily tasks, blocker resolutions, investor vault, and real cash runway into one calm home.
         </p>
 
         {/* Dual Primary CTAs */}
@@ -214,7 +226,7 @@ export const LandingPage: React.FC = () => {
           <span>Zero credit card required • Instant guest founder sandbox • Ready in 5 seconds</span>
         </div>
 
-        {/* Hero Interactive App Preview */}
+        {/* Hero Interactive App Preview Framed by Abstract Pop Art */}
         <div className="mt-12 sm:mt-16 relative mx-auto max-w-5xl rounded-3xl glass-panel p-4 sm:p-7 shadow-2xl border border-black/10 dark:border-white/15">
           <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-black/5 dark:border-white/10">
             <div className="flex items-center gap-2">
@@ -226,19 +238,26 @@ export const LandingPage: React.FC = () => {
               </span>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setIsTourOpen(true)}
-              className="text-xs font-bold text-trackaa-green hover:underline flex items-center gap-1"
-            >
-              <span>Open Guided Walkthrough</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
+            <div className="flex items-center gap-3">
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FF007A]/15 text-[#FF007A] border border-[#FF007A]/30">
+                <span>✦</span>
+                <span>Founder Mode</span>
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setIsTourOpen(true)}
+                className="text-xs font-bold text-trackaa-green hover:underline flex items-center gap-1"
+              >
+                <span>Open Guided Walkthrough</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
             {/* Widget 1: Execution Focus */}
-            <div className="p-4 rounded-2xl bg-white dark:bg-black/30 border border-black/5 dark:border-white/10 shadow-sm">
+            <div className="p-4 rounded-2xl bg-white dark:bg-black/30 border border-black/5 dark:border-white/10 shadow-sm relative overflow-hidden group">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Today's Execution
@@ -334,15 +353,41 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Hero Abstract Art Showcase Banner */}
+        <div className="mt-14 max-w-4xl mx-auto rounded-3xl p-6 sm:p-8 glass-panel border border-black/10 dark:border-white/15 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6 text-left shadow-xl">
+          <div className="max-w-md space-y-2.5 z-10">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#FF007A] text-white">
+                Abstract Founder Energy
+              </span>
+              <span className="text-xs font-bold text-slate-500">Unmistakable Personality</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white leading-tight">
+              Software with a soul. Designed for founders who build bold things.
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              We ditched grey enterprise grids for high-contrast clarity and creative energy. Build your venture in an environment that sparks genuine momentum.
+            </p>
+          </div>
+
+          <div className="flex-shrink-0 z-10 flex items-center justify-center">
+            <HeroAbstractPiece size="sm" className="sm:scale-110" />
+          </div>
+        </div>
       </section>
 
       {/* Section: What Building Your First Startup Feels Like */}
       <section id="how-it-works" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <span className="px-3.5 py-1 rounded-full bg-trackaa-green text-white text-xs font-bold uppercase tracking-wider">
-            Clarity Over Clutter
-          </span>
-          <h2 className="mt-4 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <IsometricCube size={24} />
+            <span className="px-3.5 py-1 rounded-full bg-trackaa-green text-white text-xs font-bold uppercase tracking-wider">
+              Clarity Over Clutter
+            </span>
+            <IsometricStairs size={24} />
+          </div>
+          <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
             What building your startup feels like with Trackaa
           </h2>
           <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
@@ -383,7 +428,7 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* With Trackaa */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-trackaa-green/10 border border-trackaa-green/30 text-left space-y-4 shadow-sm">
+          <div className="p-6 sm:p-8 rounded-3xl bg-trackaa-green/10 border border-trackaa-green/30 text-left space-y-4 shadow-sm relative overflow-hidden">
             <div className="flex items-center gap-2.5">
               <span className="w-8 h-8 rounded-xl bg-trackaa-green text-white flex items-center justify-center font-bold text-sm">
                 ✓
@@ -417,10 +462,14 @@ export const LandingPage: React.FC = () => {
       {/* Feature Bento Grid */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center max-w-3xl mx-auto mb-14">
-          <h2 className="text-xs font-bold tracking-widest uppercase text-trackaa-green">
-            The Complete OS Stack
-          </h2>
-          <p className="mt-3 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <StripedTube size={24} />
+            <h2 className="text-xs font-bold tracking-widest uppercase text-trackaa-green">
+              The Complete OS Stack
+            </h2>
+            <PopBlob size={24} />
+          </div>
+          <p className="mt-2 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
             Built for velocity, not enterprise meetings
           </p>
         </div>
@@ -479,10 +528,13 @@ export const LandingPage: React.FC = () => {
       {/* Dynamic Interactive Pricing Slider Section */}
       <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="px-3.5 py-1 rounded-full bg-trackaa-green text-white text-xs font-bold uppercase tracking-wider">
-            Honest Pricing
-          </span>
-          <h2 className="mt-4 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <MemphisStickerBadge icon="🌯" text="Shawarma Scale" color="orange" />
+            <span className="px-3.5 py-1 rounded-full bg-trackaa-green text-white text-xs font-bold uppercase tracking-wider">
+              Honest Pricing
+            </span>
+          </div>
+          <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
             Pricing scaled for early-stage founders
           </h2>
           <p className="mt-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
@@ -518,7 +570,12 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* The Slider Card */}
-        <div className="rounded-3xl glass-panel p-6 sm:p-10 border border-black/10 dark:border-white/15 max-w-3xl mx-auto shadow-xl">
+        <div className="rounded-3xl glass-panel p-6 sm:p-10 border border-black/10 dark:border-white/15 max-w-3xl mx-auto shadow-xl relative overflow-hidden">
+          {/* Subtle pop art corner accent */}
+          <div className="absolute -top-3 -right-3 opacity-20 pointer-events-none">
+            <IsometricCube size={70} />
+          </div>
+
           {/* Slider Header & Live Price */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-black/5 dark:border-white/10 text-left">
             <div>
@@ -598,9 +655,13 @@ export const LandingPage: React.FC = () => {
 
       {/* The Vision Section */}
       <section id="vision" className="py-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center">
-        <h2 className="text-xs font-bold tracking-widest uppercase text-trackaa-green mb-3">
-          Our Promise to Founders
-        </h2>
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <IsometricStairs size={26} />
+          <h2 className="text-xs font-bold tracking-widest uppercase text-trackaa-green">
+            Our Promise to Founders
+          </h2>
+          <IsometricCube size={26} />
+        </div>
         <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white leading-tight">
           You don't need another enterprise tool with 200 knobs. You need momentum.
         </p>
@@ -611,11 +672,14 @@ export const LandingPage: React.FC = () => {
 
       {/* Testimonials */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
-        <div className="p-8 sm:p-12 rounded-3xl glass-panel border border-black/10 dark:border-white/15 relative overflow-hidden text-left">
+        <div className="p-8 sm:p-12 rounded-3xl glass-panel border border-black/10 dark:border-white/15 relative overflow-hidden text-left shadow-xl">
           <div className="max-w-2xl">
-            <span className="px-3 py-1 rounded-full bg-trackaa-green text-white text-xs font-bold uppercase tracking-wider mb-4 inline-block">
-              Founder Story
-            </span>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="px-3 py-1 rounded-full bg-trackaa-green text-white text-xs font-bold uppercase tracking-wider inline-block">
+                Founder Story
+              </span>
+              <MemphisStickerBadge text="Real Founder Built" color="green" />
+            </div>
             <blockquote className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white leading-relaxed">
               "Trackaa eliminated the 4 hours I used to waste every Monday reconciling Slack updates and Notion tables. My co-founder and I can see our cash runway, active blockers, and customer feedback in 30 seconds."
             </blockquote>
@@ -634,8 +698,11 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Massive Typographic Footer Statement: Huge Grayed-out "TRACKAA" */}
-      <div className="w-full overflow-hidden select-none pointer-events-none pt-12 sm:pt-20 pb-4 text-center">
+      {/* Massive Typographic Footer Statement: Huge Grayed-out "TRACKAA" with Abstract Art Accent */}
+      <div className="w-full overflow-hidden select-none pointer-events-none pt-12 sm:pt-20 pb-4 text-center relative">
+        <div className="absolute left-1/2 -translate-x-1/2 -top-6 flex items-center justify-center opacity-40">
+          <AbstractHeaderFlourish />
+        </div>
         <span className="text-[13vw] font-black tracking-tighter uppercase text-slate-300/40 dark:text-slate-800/30 leading-none block font-sans">
           TRACKAA
         </span>
